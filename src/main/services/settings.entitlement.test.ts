@@ -200,3 +200,15 @@ it.each([429, 500, 502, 503])("keeps a saved license during an HTTP %s service f
   await expect(hasValidLicense()).resolves.toBe(true);
   expect(getLicenseStatus()).toMatchObject({ active: true, key: "TEST-ONLY" });
 });
+
+it("unlocks Pro without a key in the fork build", async () => {
+  delete process.env.PAPERWEIGHT_REQUIRE_LICENSE;
+  try {
+    expect(getLicenseStatus()).toEqual({ active: true, tier: "pro" });
+    expect(() => requirePro()).not.toThrow();
+    await expect(hasValidLicense()).resolves.toBe(true);
+    expect(mockFetch).not.toHaveBeenCalled();
+  } finally {
+    process.env.PAPERWEIGHT_REQUIRE_LICENSE = "1";
+  }
+});

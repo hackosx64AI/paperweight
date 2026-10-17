@@ -434,7 +434,11 @@ export default function Settings(): JSX.Element {
 
           {account && (
             <>
-              {license.active ? (
+              {license.active && !license.key ? (
+                <p className="text-sm text-base-content/60">
+                  Своя сборка: все функции Pro включены, ключ не нужен.
+                </p>
+              ) : license.active ? (
                 <div className="space-y-2">
                   <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
                     <span className="text-base-content/50">Тип</span>
