@@ -55,4 +55,6 @@ export const POSTAL_CODES: PostalSpec[] = [
   { country: "IT", pattern: BARE_5, tier: "anchor-only" },
   { country: "BE", pattern: BARE_4, tier: "anchor-only" },
   { country: "AT", pattern: BARE_4, tier: "anchor-only" },
+  // Russian indexes: six digits, first 1-6. Bare digits → anchor-only.
+  { country: "RU", pattern: /(?<![\d-])[1-6]\d{5}(?![\dA-Za-z-])/g, tier: "anchor-only" },
 ];

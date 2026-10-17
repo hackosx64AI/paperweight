@@ -11,7 +11,9 @@ no engine changes needed.
 `en` and `nl` are curated from a real mailbox and carry the scenario coverage
 (purchase confirmations, security alerts, appointment/insurance/lab updates,
 separable-verb unsubscribe phrasing, …). `de`, `fr`, `es`, `it`, `pt` are
-unverified starter sets.
+unverified starter sets. `ru` (`rus.ts`) is a phrase-grade starter set
+written for the Russian fork; Cyrillic patterns use Unicode lookarounds
+because `\b` is ASCII-only in JavaScript.
 
 **TODO (translation pass):** translate the full `en`/`nl` scenario list into
 each other language — not word-for-word, but the equivalent native phrasing a

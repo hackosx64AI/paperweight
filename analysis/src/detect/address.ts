@@ -74,6 +74,20 @@ const IBERIAN_BOX = /\b(?:Apartado(?:\s+de\s+correos)?|Apdo\.?)\s+(?:n[º°]\.?\
 // "Casella Postale 1234", "C.P. 1234"
 const IT_BOX = /\bCasella Postale\s+\d+\b/gi;
 
+// "ул. Ленина, д. 1", "проспект Мира 12к2", "Китайгородский проезд, д. 7".
+// Cyrillic needs Unicode lookarounds: \b is ASCII-only.
+const RU_STREET_TYPE =
+  String.raw`ул\.|улица|пр-т|пр-кт|просп\.|проспект|пер\.|переулок|ш\.|шоссе|б-р|бул\.|бульвар|наб\.|набережная|пл\.|площадь|проезд|пр\.|мкр\.?|микрорайон|тупик|аллея`;
+const RU_NAME = String.raw`[А-ЯЁ0-9][А-Яа-яЁё0-9.-]*(?:[^\S\n]+[А-ЯЁа-яё][А-Яа-яЁё.-]*){0,2}`;
+const RU_HOUSE = String.raw`,?[^\S\n]*(?:д\.|дом)?[^\S\n]*\d+[а-яА-Я]?(?:[/к][^\S\n]?\d+)?`;
+const RU_STREET = new RegExp(
+  String.raw`(?<![\p{L}\d])(?:(?:${RU_STREET_TYPE})[^\S\n]*${RU_NAME}|${RU_NAME}[^\S\n]+(?:${RU_STREET_TYPE}))${RU_HOUSE}`,
+  "gu",
+);
+
+// "а/я 123" (абонентский ящик)
+const RU_BOX = /(?<![\p{L}])(?:а\/я|абонентский ящик)[^\S\n]*№?[^\S\n]*\d+/giu;
+
 const ANCHORS: AnchorSpec[] = [
   { country: "NL", pattern: NL_STREET, kind: "street" },
   { country: "NL", pattern: NL_BOX, kind: "box" },
@@ -122,6 +136,8 @@ const ANCHORS: AnchorSpec[] = [
       /\b\d+[A-Za-z]?\s+(?:[A-Z][\w'.-]*\s+){1,3}(?:Street|St|Avenue|Ave|Boulevard|Blvd|Road|Rd|Drive|Dr|Lane|Ln|Court|Ct|Place|Pl|Way|Terrace|Circle|Cir|Parkway|Pkwy|Highway|Hwy)\b\.?/g,
   },
   { country: "US", pattern: EN_BOX, kind: "box" },
+  { country: "RU", pattern: RU_STREET, kind: "street" },
+  { country: "RU", pattern: RU_BOX, kind: "box" },
 ];
 
 const MAX_GAP = 60; // chars between street and postcode (~one line)
@@ -133,7 +149,7 @@ const COPYRIGHT_BOUNDARY = /(?:©|\(c\)|copyright)/i;
 // a trailing city: one capitalized token, or two when the first is a known
 // multi-word-city particle (Den Haag, New York)
 const CITY =
-  /^[ \t]*,?[ \t]*((?:(?:Den|De|Het|Sint|New|Los|San|Las|Fort|Mount|Saint|Bad)[ \t])?[A-Z][\w'-]+)/;
+  /^[ \t]*,?[ \t]*((?:(?:Den|De|Het|Sint|New|Los|San|Las|Fort|Mount|Saint|Bad)[ \t])?[A-Z][\w'-]+|(?:г\.[ \t]?|город[ \t])?[А-ЯЁ][а-яё-]+(?:[ \t][А-ЯЁ][а-яё-]+)?)/u;
 
 export function detectAddressBlocks(text: string, candidates: PostalCandidate[]): Finding[] {
   const findings: Finding[] = [];

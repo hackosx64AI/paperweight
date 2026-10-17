@@ -17,12 +17,14 @@ import type { Signal } from "../types";
 // per-language stems and labels live in the lexicons; this only supplies the
 // separator/structure and the language-agnostic assembly.
 const alt = (fragments: RegExp[]): string => fragments.map((f) => f.source).join("|");
+// Unicode-aware start boundary instead of \b: \b is ASCII-only and never
+// fires before a Cyrillic stem ("заказ №").
 const REFERENCE_PREFIX = new RegExp(
-  `\\b(?:${alt(REFERENCE_CODE_STEMS)})[-\\s]?(?:${alt(REFERENCE_CODE_LABELS)})\\s*[:#]?\\s+`,
-  "gi",
+  `(?<![\\p{L}\\d])(?:${alt(REFERENCE_CODE_STEMS)})[-\\s]?(?:${alt(REFERENCE_CODE_LABELS)})\\s*[:#]?\\s+`,
+  "giu",
 );
 
-const AMOUNT = /(?:€|\$|£)\s?\d[\d.,]*|\b\d+[.,]\d{2}\s?euros?\b/i;
+const AMOUNT = /(?:€|\$|£)\s?\d[\d.,]*|\b\d+[.,]\d{2}\s?euros?\b|\d[\d .,\u00a0]*\s?(?:₽|руб\.?(?![\p{L}]))/iu;
 
 export function textTypeSignals(text: string): Signal[] {
   if (!text) return [];

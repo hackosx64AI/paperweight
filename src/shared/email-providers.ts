@@ -11,6 +11,23 @@ export interface ProviderPreset {
 
 export const PROVIDER_PRESETS: ProviderPreset[] = [
   {
+    id: "mailru",
+    name: "Mail.ru / bk.ru / inbox.ru / list.ru",
+    imap: { host: "imap.mail.ru", port: 993, tls: true },
+    smtp: { host: "smtp.mail.ru", port: 465, tls: true },
+    supportUrl: "https://help.mail.ru/mail/mailer/popsmtp",
+    appSpecificPasswordUrl: "https://account.mail.ru/user/2-step-auth/passwords/",
+    notes: "Mail.ru пускает почтовые программы только по паролю для внешнего приложения: создайте его в настройках безопасности и введите вместо обычного пароля.",
+  },
+  {
+    id: "rambler",
+    name: "Рамблер/почта",
+    imap: { host: "imap.rambler.ru", port: 993, tls: true },
+    smtp: { host: "smtp.rambler.ru", port: 465, tls: true },
+    supportUrl: "https://help.rambler.ru/mail/mail-pochtovye-klienty/",
+    notes: "Включите доступ из почтовых программ: Настройки → Программы → «Вкл».",
+  },
+  {
     id: "apple",
     name: "iCloud Mail",
     imap: { host: "imap.mail.me.com", port: 993, tls: true },
@@ -45,11 +62,12 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
   },
   {
     id: "yandex",
-    name: "Yandex Mail",
+    name: "Яндекс Почта",
     imap: { host: "imap.yandex.com", port: 993, tls: true },
     smtp: { host: "smtp.yandex.com", port: 465, tls: true },
-    supportUrl: "https://yandex.com/support/mail/mail-clients/others.html",
-    appSpecificPasswordUrl: "https://id.yandex.com/security/app-passwords",
+    supportUrl: "https://yandex.ru/support/mail/mail-clients/others.html",
+    appSpecificPasswordUrl: "https://id.yandex.ru/security/app-passwords",
+    notes: "Включите доступ по IMAP: Все настройки → Почтовые программы → «С сервера imap.yandex.ru по протоколу IMAP». Вместо обычного пароля используйте пароль приложения.",
   },
   {
     id: "zoho",

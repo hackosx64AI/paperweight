@@ -14,8 +14,8 @@ const CATEGORIES: Array<keyof Lexicon> = [
 ];
 
 describe("lexicons", () => {
-  it("registers all seven languages", () => {
-    expect(LEXICONS).toHaveLength(7);
+  it("registers all eight languages", () => {
+    expect(LEXICONS).toHaveLength(8);
   });
 
   it("covers every category in every language", () => {

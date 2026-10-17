@@ -75,9 +75,9 @@ function patternFor(value: KnownPiiValue): RegExp | undefined {
       );
     }
     case "national_id": {
-      const compact = normalized.replace(/\s/g, "");
+      const compact = normalized.replace(/[\s-]/g, "");
       return new RegExp(
-        `(?<![A-Z0-9])${separated(compact, "\\s*")}(?![A-Z0-9])`,
+        `(?<![A-Z0-9])${separated(compact, "[\\s-]*")}(?![A-Z0-9])`,
         "iu",
       );
     }
@@ -206,12 +206,24 @@ export function reconcileKnownAddressFindings(
   });
 }
 
+// Russian mail writes "ул. Мясницкая, д. 15" while a profile may hold
+// "Мясницкая 15" or "ул Мясницкая 15": the street-type word is dropped from the
+// profile side (any surrounding text is allowed before the street anyway) and
+// the house marker "д."/"дом" may sit between street and number.
+const RU_HOUSE_MARKER = `(?:(?:д|дом)${ADDRESS_SEPARATOR})?`;
+const RU_STREET_TYPE_PREFIX =
+  /^(?:ул|улица|пр т|пр кт|пр|просп|проспект|пер|переулок|ш|шоссе|б р|бул|бульвар|наб|набережная|пл|площадь|проезд|мкр|микрорайон)\s+(?=\p{L})/u;
+
+function stripRussianStreetType(street: string): string {
+  return street.replace(RU_STREET_TYPE_PREFIX, "");
+}
+
 function compileStructuredAddress(
   value: KnownPiiValue,
 ): CompiledStructuredAddress | undefined {
   const components = value.addressComponents;
   if (!components) return undefined;
-  const street = addressPatternSource(components.street);
+  const street = addressPatternSource(stripRussianStreetType(components.street));
   const house = addressPatternSource(components.houseNumber);
   const postalCode = addressPatternSource(components.postalCode);
   if (!street || !house || !postalCode) return undefined;
@@ -221,7 +233,7 @@ function compileStructuredAddress(
     // others. Their adjacency stays strict in both directions.
     streetAndHouse: new RegExp(
       `(?<![${ADDRESS_BOUNDARY}])(?:`
-        + `${street}${ADDRESS_SEPARATOR}${house}`
+        + `${street}${ADDRESS_SEPARATOR}${RU_HOUSE_MARKER}${house}`
         + `|${house}${ADDRESS_SEPARATOR}${street}`
         + `)(?![${ADDRESS_BOUNDARY}])`,
       "giu",

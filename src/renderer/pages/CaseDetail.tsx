@@ -34,6 +34,8 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const GUIDE_URL = `${APP_CONFIG.WEBSITE}/guides/how-to-exercise-your-gdpr-rights`;
 const AUTHORITIES_URL = `${APP_CONFIG.WEBSITE}/resources/authorities`;
+// Российские компании: жалоба подаётся в электронную приёмную Роскомнадзора.
+const RKN_COMPLAINT_URL = "https://rkn.gov.ru/treatments/ask-question/";
 
 const NEXT_ACTION_DAY = {
   reminder: REMINDER_AFTER_DAYS,
@@ -221,9 +223,11 @@ function CommunicationRow({ item, caseActive, linkLoading, onToggleLink }: Commu
 function Timeline({
   openedAt,
   nextAction,
+  russian,
 }: {
   openedAt: number;
   nextAction?: keyof typeof NEXT_ACTION_DAY;
+  russian?: boolean;
 }) {
   const days = (Date.now() - openedAt) / DAY_MS;
   const progress = Math.min(100, (days / ESCALATE_AFTER_DAYS) * 100);
@@ -285,18 +289,35 @@ function Timeline({
             Обращение открыто {formatAbsoluteDate(openedAt)}, дней назад: {Math.max(0, Math.floor(days))}
           </summary>
           <div className="collapse-content text-xs text-base-content/60 space-y-2 pb-3">
-            <p>
-              У компаний есть 30 дней на ответ; для сложных запросов срок можно продлить
-              до 60 дней, но о продлении вас обязаны уведомить.
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>День 14: если ответа нет, отправьте вежливое напоминание.</li>
-              <li>День 30: отправьте официальный повторный запрос со ссылкой на установленный законом срок.</li>
-              <li>День 60: если вопрос не решён, подайте жалобу в национальный надзорный орган.</li>
-            </ul>
-            <button className="link" onClick={() => window.api.openExternal(GUIDE_URL)}>
-              Наше руководство по реализации прав по GDPR (англ.)
-            </button>
+            {russian ? (
+              <>
+                <p>
+                  По 152-ФЗ компания обязана ответить на запрос в течение 10 рабочих дней
+                  (продление — не более 5 рабочих дней с уведомлением), а после отзыва
+                  согласия — уничтожить данные в течение 30 дней.
+                </p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>День 14: срок ответа истёк — отправьте напоминание.</li>
+                  <li>День 30: отправьте официальный повторный запрос со ссылкой на 152-ФЗ.</li>
+                  <li>День 60: если вопрос не решён, подайте жалобу в Роскомнадзор.</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p>
+                  У компаний есть 30 дней на ответ; для сложных запросов срок можно продлить
+                  до 60 дней, но о продлении вас обязаны уведомить.
+                </p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>День 14: если ответа нет, отправьте вежливое напоминание.</li>
+                  <li>День 30: отправьте официальный повторный запрос со ссылкой на установленный законом срок.</li>
+                  <li>День 60: если вопрос не решён, подайте жалобу в национальный надзорный орган.</li>
+                </ul>
+                <button className="link" onClick={() => window.api.openExternal(GUIDE_URL)}>
+                  Наше руководство по реализации прав по GDPR (англ.)
+                </button>
+              </>
+            )}
           </div>
         </details>
       </div>
@@ -594,7 +615,7 @@ export default function CaseDetail(): JSX.Element {
         </p>
       </div>
 
-      {isActive && <Timeline openedAt={openedAt} nextAction={nextAction} />}
+      {isActive && <Timeline openedAt={openedAt} nextAction={nextAction} russian={emailLanguage === "ru"} />}
 
       {isActive && caseDetail.hasUnseenReply && (
         <div className="card bg-base-200">
@@ -676,9 +697,9 @@ export default function CaseDetail(): JSX.Element {
                 <div className="flex gap-2 shrink-0">
                   <button
                     className="btn btn-sm btn-ghost gap-1"
-                    onClick={() => window.api.openExternal(AUTHORITIES_URL)}
+                    onClick={() => window.api.openExternal(emailLanguage === "ru" ? RKN_COMPLAINT_URL : AUTHORITIES_URL)}
                   >
-                    Справочник регуляторов <ExternalLink className="w-3.5 h-3.5" />
+                    {emailLanguage === "ru" ? "Приёмная Роскомнадзора" : "Справочник регуляторов"} <ExternalLink className="w-3.5 h-3.5" />
                   </button>
                   <button
                     className="btn btn-primary btn-sm"

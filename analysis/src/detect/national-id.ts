@@ -19,7 +19,7 @@ export function detectNationalIds(text: string): Finding[] {
       findings.push({
         type: "national_id",
         valueRaw: m[0],
-        valueNormalized: m[0].replace(/\s/g, ""),
+        valueNormalized: m[0].replace(/[\s-]/g, ""),
         start: m.index,
         end: m.index + m[0].length,
         confidence: spec.confidence ?? "verified",

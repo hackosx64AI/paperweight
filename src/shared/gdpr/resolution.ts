@@ -13,15 +13,20 @@ export const LANGUAGES: Record<string, LanguageOption> = {
   es: { label: "Spanish", flag: "🇪🇸" },
   it: { label: "Italian", flag: "🇮🇹" },
   pt: { label: "Portuguese", flag: "🇵🇹" },
+  ru: { label: "Russian", flag: "🇷🇺" },
 };
 
 const TLD_LANG_CODES = new Set(
   Object.keys(LANGUAGES).filter((code) => code !== "en"),
 );
 
+const RUSSIAN_TLDS = new Set(["ru", "su", "xn--p1ai", "рф"]);
+
 export function detectLanguageFromDomain(domain?: string) {
   if (!domain) return "en";
   const tld = domain.split(".").pop()?.toLowerCase() ?? "";
+  // .рф (punycode) и .su — российские зоны наравне с .ru.
+  if (RUSSIAN_TLDS.has(tld)) return "ru";
   return TLD_LANG_CODES.has(tld) ? tld : "en";
 }
 
@@ -308,6 +313,20 @@ export const NON_EU_DPAS: Dpa[] = [
     tld: "is",
     languageCode: "en",
     countryAliases: ["island"],
+  },
+  {
+    flag: "🇷🇺",
+    country: "Russia",
+    dpaName: "Роскомнадзор (Федеральная служба по надзору в сфере связи, информационных технологий и массовых коммуникаций)",
+    phone: "+7 495 983-33-93",
+    address: "Китайгородский проезд, д. 7, стр. 2, 109992 Москва",
+    complaintUrl: "https://rkn.gov.ru/treatments/ask-question/",
+    websiteUrl: "https://rkn.gov.ru",
+    warning:
+      "Россия не применяет GDPR: действует Федеральный закон № 152-ФЗ «О персональных данных». Ответ на запрос — 10 рабочих дней (можно продлить на 5), уничтожение после отзыва согласия — до 30 дней. Жалобы подаются через электронную приёмную Роскомнадзора.",
+    tld: "ru",
+    languageCode: "ru",
+    countryAliases: ["россия", "российская федерация", "russian federation", "рф"],
   },
 ];
 

@@ -1418,7 +1418,7 @@ export default function Profile(): JSX.Element {
                 <input
                   type="text"
                   className="input input-bordered input-sm w-full"
-                  placeholder="Keizersgracht 123, 1015 CJ Amsterdam"
+                  placeholder="Мясницкая 15, 101000 Москва"
                   value={addressDraft.raw}
                   onChange={(event) => setAddressDraft((value) => ({
                     ...value,

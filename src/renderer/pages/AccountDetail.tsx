@@ -62,6 +62,7 @@ const LANGUAGE_LABELS_RU: Record<string, string> = {
   es: "Испанский",
   it: "Итальянский",
   pt: "Португальский",
+  ru: "Русский (152-ФЗ)",
 };
 
 const RISK_BADGE_CLASS: Record<string, string> = {
