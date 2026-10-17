@@ -9,6 +9,11 @@ on:
     branches:
       - claude/confident-noether-cbuj2x
 
+# Новый запуск отменяет незавершённый предыдущий на той же ветке.
+concurrency:
+  group: portable-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   portable-windows:
     runs-on: windows-latest
