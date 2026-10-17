@@ -1,0 +1,59 @@
+name: Портативная версия для Windows
+
+# Собирает один .exe без установки. Запускается вручную (Actions → «Портативная
+# версия для Windows» → Run workflow) и при пуше в рабочую ветку форка.
+# Готовый файл — в разделе Artifacts внизу страницы запуска.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/confident-noether-cbuj2x
+
+jobs:
+  portable-windows:
+    runs-on: windows-latest
+    env:
+      # Ключи OAuth берутся из Settings → Secrets and variables → Actions.
+      # Без них сборка пройдёт, но вход через Google/Microsoft не заработает
+      # (IMAP с паролем приложения работает всегда).
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "yarn"
+
+      - name: Check OAuth secrets
+        shell: bash
+        run: |
+          if [ -z "$GOOGLE_CLIENT_ID" ]; then
+            echo "::warning::Секрет GOOGLE_CLIENT_ID не задан — вход через Google в этой сборке работать не будет."
+          fi
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Install analysis dependencies
+        run: yarn install
+        working-directory: analysis
+
+      - name: Build portable exe
+        shell: bash
+        run: |
+          npx electron-rebuild -f -w better-sqlite3
+          yarn build
+          npx electron-builder --win portable --x64 --publish never \
+            '-c.portable.artifactName=Paperweight-${version}-portable.exe'
+
+      - name: Upload portable exe
+        uses: actions/upload-artifact@v7
+        with:
+          name: paperweight-portable-windows
+          path: dist/*-portable.exe
+          archive: false
