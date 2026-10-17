@@ -5,6 +5,13 @@ import { APP_CONFIG } from "@shared/config";
 import type { LicenseTier, LicenseStatus, McpSetup, WhitelistEntry } from "@shared/types";
 import { licenseLog } from "../utils/log";
 
+// Сборка форка: все функции Pro включены без лицензионного ключа (MIT это
+// позволяет). PAPERWEIGHT_REQUIRE_LICENSE=1 возвращает исходную проверку ключа —
+// с ней работают тесты лицензирования.
+function proUnlocked(): boolean {
+  return process.env.PAPERWEIGHT_REQUIRE_LICENSE !== "1";
+}
+
 export const PRO_REQUIRED_MESSAGE = "Paperweight Pro is required. Upgrade in Settings to continue.";
 
 export function requirePro(): void {
@@ -280,6 +287,7 @@ export async function activateLicense(key: string): Promise<LicenseStatus> {
 }
 
 export function getLicenseStatus(): LicenseStatus {
+  if (proUnlocked()) return { active: true, tier: "pro" };
   const info = loadLicense();
   if (!info) return { active: false };
 
@@ -297,6 +305,7 @@ export function getLicenseStatus(): LicenseStatus {
 }
 
 export async function hasValidLicense(): Promise<boolean> {
+  if (proUnlocked()) return true;
   const info = loadLicense();
   if (!info) return false;
 

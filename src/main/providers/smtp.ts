@@ -46,7 +46,7 @@ export async function testSmtpConnection(config: {
       syncLog.error(`SMTP server at ${config.host}:${config.port} does not advertise AUTH — likely not a real SMTP server or wrong port`);
       return {
         success: false,
-        error: "SMTP server did not offer authentication. Check the host and port — this may not be a real SMTP server.",
+        error: "SMTP-сервер не предложил аутентификацию. Проверьте хост и порт — возможно, это не SMTP-сервер.",
       };
     }
 

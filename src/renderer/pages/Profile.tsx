@@ -8,7 +8,7 @@ import {
   normalizeValue,
   validateValue,
 } from "@paperweight/analysis/profile-values";
-import { formatUtcStrictDate } from "@shared/formatting";
+import { formatUtcStrictDate, plural } from "@shared/formatting";
 import { PROFILE_BIRTH_YEAR_MIN } from "@shared/types";
 import type { ProfileBirthDate, UserProfile } from "@shared/types";
 import { useAccounts } from "../hooks/useAccounts";
@@ -148,7 +148,7 @@ const EMPTY_PAYMENT: PaymentDraft = {
 
 const PAYMENT_LABELS: Record<PaymentKind, string> = {
   iban: "IBAN",
-  credit_card: "Card",
+  credit_card: "Карта",
 };
 
 // Above this many addresses the list gets a search box and its own scroll area.
@@ -217,7 +217,7 @@ function birthdayFromProfile(date?: ProfileBirthDate): Birthday {
 function birthdayError(birthday: Birthday): string {
   const values = [birthday.day, birthday.month, birthday.year];
   if (values.some((value) => !value)) {
-    return "Enter a valid date of birth.";
+    return "Введите корректную дату рождения.";
   }
 
   const day = Number(birthday.day);
@@ -231,7 +231,7 @@ function birthdayError(birthday: Birthday): string {
     || date.getUTCMonth() !== month - 1
     || date.getUTCDate() !== day
   ) {
-    return "Enter a valid date of birth.";
+    return "Введите корректную дату рождения.";
   }
   return "";
 }
@@ -264,7 +264,7 @@ function ProfileRow({
             className="btn btn-ghost btn-xs"
             onClick={onEdit}
           >
-            Edit
+            Изменить
           </button>
         )}
         {onRemove && (
@@ -273,7 +273,7 @@ function ProfileRow({
             className="btn btn-ghost btn-xs"
             onClick={onRemove}
           >
-            Remove
+            Удалить
           </button>
         )}
       </div>
@@ -441,7 +441,7 @@ export default function Profile(): JSX.Element {
     try {
       hydrateProfile(await window.api.getUserProfile());
     } catch {
-      setLoadError("Could not load your profile.");
+      setLoadError("Не удалось загрузить профиль.");
     } finally {
       setLoading(false);
     }
@@ -468,7 +468,7 @@ export default function Profile(): JSX.Element {
     const middleName = compactWhitespace(nameDraft.middleName);
     const lastName = compactWhitespace(nameDraft.lastName);
     if (!firstName || !lastName) {
-      setNameError("Enter a first and last name.");
+      setNameError("Введите имя и фамилию.");
       return;
     }
     const normalized = [firstName, middleName, lastName]
@@ -483,7 +483,7 @@ export default function Profile(): JSX.Element {
         .toLocaleLowerCase() === normalized
     ));
     if (duplicate) {
-      setNameError("This name is already in your profile.");
+      setNameError("Это имя уже есть в профиле.");
       return;
     }
 
@@ -522,7 +522,7 @@ export default function Profile(): JSX.Element {
     const address = compactWhitespace(emailDraft);
     const normalized = normalizeValue("email", address);
     if (!validateValue("email", emailDraft)) {
-      setEmailError("Enter a complete email address.");
+      setEmailError("Введите полный адрес email.");
       return;
     }
     const duplicate = (
@@ -533,7 +533,7 @@ export default function Profile(): JSX.Element {
       ))
     );
     if (duplicate) {
-      setEmailError("This email address is already in your profile.");
+      setEmailError("Этот адрес уже есть в профиле.");
       return;
     }
     const nextEmails = editingEmailId
@@ -561,13 +561,13 @@ export default function Profile(): JSX.Element {
   function savePhone(): void {
     const number = normalizeValue("phone", phoneDraft.number);
     if (!validateValue("phone", phoneDraft.number)) {
-      setPhoneError("Enter a phone number with 7 to 15 digits.");
+      setPhoneError("Введите номер телефона из 7–15 цифр.");
       return;
     }
     if (phones.some((entry) => (
       entry.id !== editingPhoneId && entry.number === number
     ))) {
-      setPhoneError("This phone number is already in your profile.");
+      setPhoneError("Этот номер уже есть в профиле.");
       return;
     }
     const nextPhones = editingPhoneId
@@ -603,7 +603,7 @@ export default function Profile(): JSX.Element {
       addressDraft.mode === "structured"
       && !isSupportedCountryCode(country)
     ) {
-      setAddressError("Add a supported two-letter country code.");
+      setAddressError("Укажите поддерживаемый двухбуквенный код страны.");
       return;
     }
     const [street, houseNumber, postalCode, city] = [
@@ -617,11 +617,11 @@ export default function Profile(): JSX.Element {
       addressDraft.mode === "structured"
       && [street, houseNumber, postalCode, city].some((value) => !value)
     ) {
-      setAddressError("Enter the street, house number, postal code, and city.");
+      setAddressError("Введите улицу, номер дома, индекс и город.");
       return;
     }
     if (addressDraft.mode === "raw" && !validateValue("address", raw)) {
-      setAddressError("Enter an address or postal code.");
+      setAddressError("Введите адрес или индекс.");
       return;
     }
 
@@ -643,7 +643,7 @@ export default function Profile(): JSX.Element {
         ? duplicate
         : undefined;
     if (duplicate && !rawUpgrade) {
-      setAddressError("This address is already in your profile.");
+      setAddressError("Этот адрес уже есть в профиле.");
       return;
     }
     const display = addressDraft.mode === "raw"
@@ -702,14 +702,14 @@ export default function Profile(): JSX.Element {
   function saveNationalId(): void {
     const value = normalizeValue("national_id", nationalIdDraft.value);
     if (!validateValue("national_id", nationalIdDraft.value)) {
-      setNationalIdError("Enter a national ID.");
+      setNationalIdError("Введите номер документа.");
       return;
     }
     if (nationalIds.some((entry) => (
       entry.id !== editingNationalId
       && entry.value === value
     ))) {
-      setNationalIdError("This national ID is already in your profile.");
+      setNationalIdError("Этот документ уже есть в профиле.");
       return;
     }
     const nextNationalIds = editingNationalId
@@ -743,14 +743,14 @@ export default function Profile(): JSX.Element {
       paymentDraft.kind === "iban"
       && !validateValue("iban", paymentDraft.value)
     ) {
-      setPaymentError("Enter a valid IBAN.");
+      setPaymentError("Введите корректный IBAN.");
       return;
     }
     if (
       paymentDraft.kind === "credit_card"
       && !validateValue("credit_card", paymentDraft.value)
     ) {
-      setPaymentError("Enter a valid card number.");
+      setPaymentError("Введите корректный номер карты.");
       return;
     }
     if (payments.some((entry) => (
@@ -758,7 +758,7 @@ export default function Profile(): JSX.Element {
       && entry.kind === paymentDraft.kind
       && entry.value === value
     ))) {
-      setPaymentError(`This ${PAYMENT_LABELS[paymentDraft.kind]} is already in your profile.`);
+      setPaymentError(`${PAYMENT_LABELS[paymentDraft.kind]}: это значение уже есть в профиле.`);
       return;
     }
     const nextPayments = editingPaymentId
@@ -848,7 +848,7 @@ export default function Profile(): JSX.Element {
         } catch {
           if (pendingProfileRef.current) continue;
           failedProfileRef.current = profile;
-          setSaveError("Could not save profile. Edit the entry or try again.");
+          setSaveError("Не удалось сохранить профиль. Исправьте запись или попробуйте снова.");
           setSaveFailed(true);
           setSaved(false);
           failed = true;
@@ -884,7 +884,7 @@ export default function Profile(): JSX.Element {
     const country = normalizeCountryCode(currentCountry);
     if (country && !isSupportedCountryCode(country)) {
       setProfileFieldError(
-        "Current location must be a supported two-letter country code.",
+        "Текущее местоположение должно быть поддерживаемым двухбуквенным кодом страны.",
       );
       setSaved(false);
       return;
@@ -950,14 +950,14 @@ export default function Profile(): JSX.Element {
   if (loadError) {
     return (
       <div className="space-y-4 max-w-3xl">
-        <h1 className="text-2xl font-bold">User Profile</h1>
+        <h1 className="text-2xl font-bold">Профиль</h1>
         <p role="alert" className="text-sm text-error">{loadError}</p>
         <button
           type="button"
           className="btn btn-primary btn-sm"
           onClick={() => void loadProfile()}
         >
-          Try again
+          Повторить
         </button>
       </div>
     );
@@ -967,22 +967,22 @@ export default function Profile(): JSX.Element {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold">User Profile</h1>
+          <h1 className="text-2xl font-bold">Профиль</h1>
           <p className="text-sm text-base-content/50 mt-1">
-            Add current and past personal data that belongs to you.
+            Добавьте свои текущие и прежние личные данные.
           </p>
         </div>
         <div className="flex items-end gap-3 shrink-0">
           <label className="flex flex-col">
             <span className="text-xs text-base-content/60 mb-1">
-              Current location
+              Страна проживания
             </span>
             <input
               type="text"
               maxLength={2}
               className="input input-bordered input-sm w-20 uppercase"
               placeholder="--"
-              aria-label="Current location"
+              aria-label="Страна проживания"
               value={currentCountry}
               onBlur={saveCurrentCountry}
               onChange={(event) => {
@@ -1005,10 +1005,10 @@ export default function Profile(): JSX.Element {
         <ShieldCheck className="w-5 h-5 mt-0.5" strokeWidth={1.5} />
         <div>
           <p className="font-medium">
-            Complete your user profile to better match personal data.
+            Заполните профиль, чтобы точнее находить ваши личные данные.
           </p>
           <p className="text-sm text-base-content/60 mt-1">
-            All matching happens locally. No data ever leaves this device.
+            Сопоставление выполняется локально. Данные не покидают это устройство.
           </p>
         </div>
       </div>
@@ -1025,21 +1025,21 @@ export default function Profile(): JSX.Element {
               className="btn btn-ghost btn-xs"
               onClick={retryProfileSave}
             >
-              Retry
+              Повторить
             </button>
           )}
         </div>
       )}
-      {saving && <p role="status" className="text-sm text-base-content/60">Saving...</p>}
+      {saving && <p role="status" className="text-sm text-base-content/60">Сохранение...</p>}
       {!saving && saved && (
-        <p role="status" className="text-sm text-success">Profile saved.</p>
+        <p role="status" className="text-sm text-success">Профиль сохранён.</p>
       )}
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Names</h3>
+          <h3 className="font-semibold">Имена</h3>
           <p className="text-sm text-base-content/60">
-            Add current names, former names, and initials as separate entries.
+            Добавляйте текущие и прежние имена, а также инициалы отдельными записями.
           </p>
           {names.length > 0 && (
             <div className="space-y-1">
@@ -1072,7 +1072,7 @@ export default function Profile(): JSX.Element {
           >
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <label className="flex flex-col">
-                <span className="text-xs mb-1">First name</span>
+                <span className="text-xs mb-1">Имя</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm"
@@ -1084,7 +1084,7 @@ export default function Profile(): JSX.Element {
                 />
               </label>
               <label className="flex flex-col">
-                <span className="text-xs mb-1">Middle name</span>
+                <span className="text-xs mb-1">Отчество / второе имя</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm"
@@ -1096,7 +1096,7 @@ export default function Profile(): JSX.Element {
                 />
               </label>
               <label className="flex flex-col">
-                <span className="text-xs mb-1">Last name</span>
+                <span className="text-xs mb-1">Фамилия</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm"
@@ -1112,11 +1112,11 @@ export default function Profile(): JSX.Element {
             <div className="flex justify-end gap-2">
               {editingNameId && (
                 <button type="button" className="btn btn-ghost btn-sm" onClick={clearNameDraft}>
-                  Cancel
+                  Отмена
                 </button>
               )}
               <button type="submit" className="btn btn-primary btn-sm">
-                {editingNameId ? "Save name" : "Add name"}
+                {editingNameId ? "Сохранить имя" : "Добавить имя"}
               </button>
             </div>
           </form>
@@ -1125,24 +1125,24 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Email addresses</h3>
+          <h3 className="font-semibold">Адреса email</h3>
           <p className="text-sm text-base-content/60">
-            Every address and alias is a separate entry. Connected accounts are
-            included automatically.
+            Каждый адрес и псевдоним — отдельная запись. Подключённые аккаунты
+            добавляются автоматически.
           </p>
           {emailListIsLong && (
             <div className="flex items-center gap-3">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Поиск..."
                 className="input input-sm input-bordered w-48"
                 value={emailFilter}
                 onChange={(e) => setEmailFilter(e.target.value)}
               />
               <span className="text-sm text-base-content/60 shrink-0">
                 {emailQuery
-                  ? `${shownEmails} of ${totalEmails}`
-                  : `${totalEmails} ${totalEmails !== 1 ? "addresses" : "address"}`}
+                  ? `${shownEmails} из ${totalEmails}`
+                  : `${totalEmails} ${plural(totalEmails, "адрес", "адреса", "адресов")}`}
               </span>
             </div>
           )}
@@ -1159,7 +1159,7 @@ export default function Profile(): JSX.Element {
                   key={`connected-${address}`}
                   value={address}
                   monospace
-                  badge="Connected"
+                  badge="Подключён"
                 />
               ))}
               {shownEditable.map((entry) => (
@@ -1178,7 +1178,7 @@ export default function Profile(): JSX.Element {
               ))}
               {shownEmails === 0 && (
                 <p className="text-sm text-base-content/50 py-2">
-                  No address matches that search.
+                  Нет адресов, подходящих под поиск.
                 </p>
               )}
             </div>
@@ -1192,7 +1192,7 @@ export default function Profile(): JSX.Element {
           >
             <div className="flex items-end gap-3">
               <label className="flex flex-col flex-1">
-                <span className="text-xs mb-1">Email address</span>
+                <span className="text-xs mb-1">Адрес email</span>
                 <input
                   type="email"
                   className="input input-bordered input-sm"
@@ -1203,11 +1203,11 @@ export default function Profile(): JSX.Element {
               </label>
               {editingEmailId && (
                 <button type="button" className="btn btn-ghost btn-sm" onClick={clearEmailDraft}>
-                  Cancel
+                  Отмена
                 </button>
               )}
               <button type="submit" className="btn btn-primary btn-sm">
-                {editingEmailId ? "Save" : "Add"}
+                {editingEmailId ? "Сохранить" : "Добавить"}
               </button>
             </div>
             {emailError && <p className="text-sm text-error">{emailError}</p>}
@@ -1217,9 +1217,9 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Phone numbers</h3>
+          <h3 className="font-semibold">Телефоны</h3>
           <p className="text-sm text-base-content/60">
-            Enter any familiar format. Numbers are stored in one matching form.
+            Вводите в любом привычном формате — номера хранятся в едином виде для сопоставления.
           </p>
           {phones.length > 0 && (
             <div className="space-y-1">
@@ -1248,7 +1248,7 @@ export default function Profile(): JSX.Element {
           >
             <div className="flex items-end gap-3">
               <label className="flex flex-col flex-1">
-                <span className="text-xs mb-1">Phone number</span>
+                <span className="text-xs mb-1">Номер телефона</span>
                 <input
                   type="tel"
                   className="input input-bordered input-sm"
@@ -1261,11 +1261,11 @@ export default function Profile(): JSX.Element {
               </label>
               {editingPhoneId && (
                 <button type="button" className="btn btn-ghost btn-sm" onClick={clearPhoneDraft}>
-                  Cancel
+                  Отмена
                 </button>
               )}
               <button type="submit" className="btn btn-primary btn-sm">
-                {editingPhoneId ? "Save" : "Add"}
+                {editingPhoneId ? "Сохранить" : "Добавить"}
               </button>
             </div>
             {phoneError && <p className="text-sm text-error">{phoneError}</p>}
@@ -1275,9 +1275,9 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Addresses</h3>
+          <h3 className="font-semibold">Адреса</h3>
           <p className="text-sm text-base-content/60">
-            Add a full address, one address line, or a postal code.
+            Добавьте полный адрес, адрес одной строкой или индекс.
           </p>
           {addresses.length > 0 && (
             <div className="space-y-1">
@@ -1311,7 +1311,7 @@ export default function Profile(): JSX.Element {
             <div>
               <div
                 role="tablist"
-                aria-label="Address format"
+                aria-label="Формат адреса"
                 className="tabs tabs-box tabs-sm w-fit"
               >
                 <button
@@ -1326,7 +1326,7 @@ export default function Profile(): JSX.Element {
                     mode: "structured",
                   }))}
                 >
-                  Full address
+                  Полный адрес
                 </button>
                 <button
                   type="button"
@@ -1340,7 +1340,7 @@ export default function Profile(): JSX.Element {
                     mode: "raw",
                   }))}
                 >
-                  Single line
+                  Одной строкой
                 </button>
               </div>
             </div>
@@ -1348,7 +1348,7 @@ export default function Profile(): JSX.Element {
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <label className="flex flex-col flex-1 min-w-0">
-                    <span className="text-xs mb-1">Street</span>
+                    <span className="text-xs mb-1">Улица</span>
                     <input
                       type="text"
                       className="input input-bordered input-sm w-full"
@@ -1360,7 +1360,7 @@ export default function Profile(): JSX.Element {
                     />
                   </label>
                   <label className="flex flex-col w-full sm:w-40 shrink-0">
-                    <span className="text-xs mb-1">House number</span>
+                    <span className="text-xs mb-1">Номер дома</span>
                     <input
                       type="text"
                       className="input input-bordered input-sm w-full"
@@ -1374,7 +1374,7 @@ export default function Profile(): JSX.Element {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <label className="flex flex-col w-full sm:w-40 shrink-0">
-                    <span className="text-xs mb-1">Postal code</span>
+                    <span className="text-xs mb-1">Индекс</span>
                     <input
                       type="text"
                       className="input input-bordered input-sm w-full"
@@ -1386,7 +1386,7 @@ export default function Profile(): JSX.Element {
                     />
                   </label>
                   <label className="flex flex-col flex-1 min-w-0">
-                    <span className="text-xs mb-1">City</span>
+                    <span className="text-xs mb-1">Город</span>
                     <input
                       type="text"
                       className="input input-bordered input-sm w-full"
@@ -1398,7 +1398,7 @@ export default function Profile(): JSX.Element {
                     />
                   </label>
                   <label className="flex flex-col w-full sm:w-24 shrink-0">
-                    <span className="text-xs mb-1">Country</span>
+                    <span className="text-xs mb-1">Страна</span>
                     <input
                       type="text"
                       maxLength={2}
@@ -1414,11 +1414,11 @@ export default function Profile(): JSX.Element {
               </div>
             ) : (
               <label className="flex flex-col">
-                <span className="text-xs mb-1">Address or postal code</span>
+                <span className="text-xs mb-1">Адрес или индекс</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm w-full"
-                  placeholder="Keizersgracht 123, 1015 CJ Amsterdam"
+                  placeholder="Мясницкая 15, 101000 Москва"
                   value={addressDraft.raw}
                   onChange={(event) => setAddressDraft((value) => ({
                     ...value,
@@ -1430,11 +1430,11 @@ export default function Profile(): JSX.Element {
             <div className="flex justify-end gap-2">
               {editingAddressId && (
                 <button type="button" className="btn btn-ghost btn-sm" onClick={clearAddressDraft}>
-                  Cancel
+                  Отмена
                 </button>
               )}
               <button type="submit" className="btn btn-primary btn-sm">
-                {editingAddressId ? "Save" : "Add"}
+                {editingAddressId ? "Сохранить" : "Добавить"}
               </button>
             </div>
             {addressError && <p className="text-sm text-error">{addressError}</p>}
@@ -1444,9 +1444,9 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Date of birth</h3>
+          <h3 className="font-semibold">Дата рождения</h3>
           <p className="text-sm text-base-content/60">
-            Used to match dates in your messages.
+            Используется для поиска дат в ваших письмах.
           </p>
           {storedBirthDate && (
             <div className="space-y-1">
@@ -1471,7 +1471,7 @@ export default function Profile(): JSX.Element {
             >
               <div className="grid grid-cols-3 gap-3 max-w-md">
                 <label className="flex flex-col">
-                  <span className="text-xs mb-1">Day</span>
+                  <span className="text-xs mb-1">День</span>
                   <input
                     type="number"
                     min="1"
@@ -1492,7 +1492,7 @@ export default function Profile(): JSX.Element {
                   />
                 </label>
                 <label className="flex flex-col">
-                  <span className="text-xs mb-1">Month</span>
+                  <span className="text-xs mb-1">Месяц</span>
                   <input
                     type="number"
                     min="1"
@@ -1513,7 +1513,7 @@ export default function Profile(): JSX.Element {
                   />
                 </label>
                 <label className="flex flex-col">
-                  <span className="text-xs mb-1">Year</span>
+                  <span className="text-xs mb-1">Год</span>
                   <input
                     type="number"
                     min={PROFILE_BIRTH_YEAR_MIN}
@@ -1541,11 +1541,11 @@ export default function Profile(): JSX.Element {
                     className="btn btn-ghost btn-sm"
                     onClick={clearBirthDateDraft}
                   >
-                    Cancel
+                    Отмена
                   </button>
                 )}
                 <button type="submit" className="btn btn-primary btn-sm">
-                  {editingBirthDate ? "Save" : "Add"}
+                  {editingBirthDate ? "Сохранить" : "Добавить"}
                 </button>
               </div>
               {birthDateError && (
@@ -1558,9 +1558,9 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">National IDs</h3>
+          <h3 className="font-semibold">Документы</h3>
           <p className="text-sm text-base-content/60">
-            Government identifiers.
+            Государственные идентификаторы (паспорт, ИНН, СНИЛС и т. п.).
           </p>
           {nationalIds.length > 0 && (
             <div className="space-y-1">
@@ -1568,7 +1568,7 @@ export default function Profile(): JSX.Element {
                 <ProfileRow
                   key={entry.id}
                   value={entry.value}
-                  meta="National ID"
+                  meta="Документ"
                   monospace
                   onEdit={() => editNationalId(entry)}
                   onRemove={() => {
@@ -1594,7 +1594,7 @@ export default function Profile(): JSX.Element {
           >
             <div className="flex items-end gap-3">
               <label className="flex flex-col flex-1">
-                <span className="text-xs mb-1">National ID</span>
+                <span className="text-xs mb-1">Номер документа</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm font-mono"
@@ -1610,11 +1610,11 @@ export default function Profile(): JSX.Element {
                   className="btn btn-ghost btn-sm"
                   onClick={clearNationalIdDraft}
                 >
-                  Cancel
+                  Отмена
                 </button>
               )}
               <button type="submit" className="btn btn-primary btn-sm">
-                {editingNationalId ? "Save" : "Add"}
+                {editingNationalId ? "Сохранить" : "Добавить"}
               </button>
             </div>
             {nationalIdError && (
@@ -1626,9 +1626,9 @@ export default function Profile(): JSX.Element {
 
       <section className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Payments</h3>
+          <h3 className="font-semibold">Платёжные данные</h3>
           <p className="text-sm text-base-content/60">
-            Bank accounts and payment cards.
+            Банковские счета и платёжные карты.
           </p>
           {payments.length > 0 && (
             <div className="space-y-1">
@@ -1662,7 +1662,7 @@ export default function Profile(): JSX.Element {
           >
             <div className="grid grid-cols-[140px_minmax(0,1fr)_auto] items-end gap-3">
               <label className="flex flex-col">
-                <span className="text-xs mb-1">Type</span>
+                <span className="text-xs mb-1">Тип</span>
                 <select
                   className="select select-bordered select-sm"
                   value={paymentDraft.kind}
@@ -1672,11 +1672,11 @@ export default function Profile(): JSX.Element {
                   }))}
                 >
                   <option value="iban">IBAN</option>
-                  <option value="credit_card">Card</option>
+                  <option value="credit_card">Карта</option>
                 </select>
               </label>
               <label className="flex flex-col">
-                <span className="text-xs mb-1">Value</span>
+                <span className="text-xs mb-1">Значение</span>
                 <input
                   type="text"
                   className="input input-bordered input-sm font-mono"
@@ -1694,11 +1694,11 @@ export default function Profile(): JSX.Element {
                     className="btn btn-ghost btn-sm"
                     onClick={clearPaymentDraft}
                   >
-                    Cancel
+                    Отмена
                   </button>
                 )}
                 <button type="submit" className="btn btn-primary btn-sm">
-                  {editingPaymentId ? "Save" : "Add"}
+                  {editingPaymentId ? "Сохранить" : "Добавить"}
                 </button>
               </div>
             </div>

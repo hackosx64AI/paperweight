@@ -66,7 +66,7 @@ export function normalizeValue(type: FindingType, raw: string): string {
     case "postal_code":
       return normalizePostalCode(raw.trim().toUpperCase());
     case "national_id":
-      return raw.trim().toUpperCase().replace(/\s/g, "");
+      return raw.trim().toUpperCase().replace(/[\s-]/g, "");
     case "iban":
       return normalizeIban(raw.trim());
     case "credit_card":

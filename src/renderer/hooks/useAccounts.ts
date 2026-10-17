@@ -3,7 +3,7 @@ import type { AccountSummary } from "@shared/types";
 
 import { useLicense } from "../context/LicenseContext";
 
-export const MAILBOX_CHANGED = "This action no longer matches the current mailbox.";
+export const MAILBOX_CHANGED = "Это действие больше не относится к текущему почтовому ящику.";
 
 export function viewedMailboxEmail(): string | undefined {
   return window.api.listAccounts().find((account) => account.isActive)?.email;

@@ -3,13 +3,13 @@ import { useCallback, useRef, useState } from "react";
 import type { PiiRevealedValue, PiiValue } from "@shared/types";
 
 const LOAD_ERROR =
-  "Could not load what was found in your emails. Reload the page and try again.";
+  "Не удалось загрузить найденное в ваших письмах. Перезагрузите страницу и попробуйте снова.";
 const REVEAL_ERROR =
-  "Could not show the full values. Reload the page and try again.";
+  "Не удалось показать полные значения. Перезагрузите страницу и попробуйте снова.";
 const ACTION_ERRORS = {
   confirm:
-    "Could not add that value to your profile. Reload the page and try again.",
-  suppress: "Could not update that value. Reload the page and try again.",
+    "Не удалось добавить значение в профиль. Перезагрузите страницу и попробуйте снова.",
+  suppress: "Не удалось обновить значение. Перезагрузите страницу и попробуйте снова.",
 };
 
 type PiiAction = keyof typeof ACTION_ERRORS;

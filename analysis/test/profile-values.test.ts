@@ -43,7 +43,9 @@ describe("profile values", () => {
   it("keeps national ID validation country-neutral", () => {
     expect(normalizeValue("national_id", "ab 12 34")).toBe("AB1234");
     expect(validateValue("national_id", "ab 12 34")).toBe(true);
-    expect(validateValue("national_id", "AB-12-34")).toBe(false);
+    // Dashes are formatting, like spaces (Russian СНИЛС: 123-456-789 01).
+    expect(normalizeValue("national_id", "AB-12-34")).toBe("AB1234");
+    expect(validateValue("national_id", "AB-12/34")).toBe(false);
   });
 
   it("normalizes raw addresses without adding country data", () => {

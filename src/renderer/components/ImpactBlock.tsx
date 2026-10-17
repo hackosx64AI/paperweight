@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ImpactStats } from "@shared/types";
-import { formatBytes } from "@shared/formatting";
+import { formatBytes, plural } from "@shared/formatting";
 
 function buildSentence(stats: ImpactStats): { headline: string; detail: string } | null {
   const { listsUnsubscribed, emailsDeleted, dataReclaimedBytes } = stats;
@@ -8,12 +8,12 @@ function buildSentence(stats: ImpactStats): { headline: string; detail: string }
 
   const parts: string[] = [];
   if (listsUnsubscribed > 0)
-    parts.push(`unsubscribed from ${listsUnsubscribed.toLocaleString()} list${listsUnsubscribed !== 1 ? "s" : ""}`);
+    parts.push(`отписались от ${listsUnsubscribed.toLocaleString()} ${plural(listsUnsubscribed, "рассылки", "рассылок", "рассылок")}`);
   if (emailsDeleted > 0)
-    parts.push(`deleted ${emailsDeleted.toLocaleString()} email${emailsDeleted !== 1 ? "s" : ""}`);
+    parts.push(`удалили ${emailsDeleted.toLocaleString()} ${plural(emailsDeleted, "письмо", "письма", "писем")}`);
 
-  const headline = parts.length > 0 ? `You've ${parts.join(" and ")}.` : "";
-  const detail = dataReclaimedBytes > 0 ? `${formatBytes(dataReclaimedBytes)} reclaimed` : "";
+  const headline = parts.length > 0 ? `Вы ${parts.join(" и ")}.` : "";
+  const detail = dataReclaimedBytes > 0 ? `${formatBytes(dataReclaimedBytes)} освобождено` : "";
 
   return { headline, detail };
 }

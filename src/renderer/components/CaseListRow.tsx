@@ -25,8 +25,8 @@ export function CaseListRow({
       >
         <span className="font-medium truncate flex-1 min-w-0">{primary}</span>
         {item.hasUnseenReply && (
-          <span className="badge badge-xs badge-error shrink-0" aria-label="New reply">
-            New
+          <span className="badge badge-xs badge-error shrink-0" aria-label="Новый ответ">
+            Новое
           </span>
         )}
         <CaseStatusBadge item={item} />

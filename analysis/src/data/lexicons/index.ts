@@ -8,12 +8,13 @@ import { fra } from "./fra";
 import { ita } from "./ita";
 import { nld } from "./nld";
 import { por } from "./por";
+import { rus } from "./rus";
 import { spa } from "./spa";
 import type { Lexicon } from "./lexicon";
 
 export type { Lexicon };
 
-export const LEXICONS: Lexicon[] = [deu, eng, fra, ita, nld, por, spa];
+export const LEXICONS: Lexicon[] = [deu, eng, fra, ita, nld, por, rus, spa];
 
 function merge(key: keyof Lexicon): RegExp[] {
   return LEXICONS.flatMap((lexicon) => lexicon[key]);

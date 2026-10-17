@@ -14,6 +14,7 @@ import {
   formatRelativeDate,
   formatAbsoluteDate,
   formatBytes,
+  plural,
 } from "@shared/formatting";
 import {
   LANGUAGES,
@@ -51,6 +52,18 @@ import {
   activityEntryLabel,
   gdprRequestLabel,
 } from "../utils/activityLabels";
+
+// Названия языков письма-запроса для интерфейса; сам LANGUAGES общий с сайтом.
+const LANGUAGE_LABELS_RU: Record<string, string> = {
+  en: "Английский",
+  nl: "Нидерландский",
+  de: "Немецкий",
+  fr: "Французский",
+  es: "Испанский",
+  it: "Итальянский",
+  pt: "Португальский",
+  ru: "Русский (152-ФЗ)",
+};
 
 const RISK_BADGE_CLASS: Record<string, string> = {
   high: "badge-error",
@@ -103,7 +116,7 @@ function EmailsBySender({
                 {formatRelativeDate(msg.date)}
               </span>
               <div className="min-w-0">
-                <p className="truncate">{msg.subject ?? "(no subject)"}</p>
+                <p className="truncate">{msg.subject ?? "(без темы)"}</p>
                 {msg.body_preview && (
                   <p className="truncate text-base-content/40 text-xs">
                     {msg.body_preview}
@@ -120,12 +133,12 @@ function EmailsBySender({
 
 function methodDescription(method: string, url: string): string {
   if (method === "rfc8058") {
-    return "Automatically send an unsubscribe request.";
+    return "Автоматически отправить запрос на отписку.";
   }
   if (url.startsWith("mailto:")) {
-    return "Sends an unsubscribe email from your account.";
+    return "Отправит письмо об отписке с вашего аккаунта.";
   }
-  return "Opens the unsubscribe page in your browser.";
+  return "Откроет страницу отписки в браузере.";
 }
 
 function unsubDescription(
@@ -135,23 +148,23 @@ function unsubDescription(
   if (entry.method === "rfc8058") {
     return (
       <>
-        An unsubscribe request will be sent to <strong>{vendorName}</strong>{" "}
-        automatically.
+        Запрос на отписку будет автоматически отправлен{" "}
+        <strong>{vendorName}</strong>.
       </>
     );
   }
   if (entry.url.startsWith("mailto:")) {
     return (
       <>
-        Paperweight will send an unsubscribe email from your account to{" "}
+        Paperweight отправит письмо об отписке с вашего аккаунта{" "}
         <strong>{vendorName}</strong>.
       </>
     );
   }
   return (
     <>
-      The unsubscribe page for <strong>{vendorName}</strong> will open in your
-      browser. Complete the process there.
+      Страница отписки <strong>{vendorName}</strong> откроется в браузере.
+      Завершите отписку там.
     </>
   );
 }
@@ -198,7 +211,7 @@ function ActionGroup({ index, label, description, doneCount, total, children }: 
           <p className="text-sm">
             {label}{" "}
             <span className="text-base-content/50">
-              ({doneCount > 0 ? `${doneCount}/${total} done` : total})
+              ({doneCount > 0 ? `выполнено ${doneCount}/${total}` : total})
             </span>
           </p>
           <p className="text-xs text-base-content/50 mt-0.5">{description}</p>
@@ -248,7 +261,7 @@ function ActionTaskRow({ index, label, description, done, spinning, anyLoading, 
             disabled={done || anyLoading}
             onClick={onMarkDone}
           >
-            Mark as done
+            Отметить выполненным
           </button>
         )}
       </div>
@@ -288,7 +301,7 @@ function WhitelistSection({
               disabled={isLoading}
               onClick={() => onRemove(entry.value)}
             >
-              Remove
+              Удалить
             </button>
           </div>
         ))}
@@ -406,7 +419,7 @@ export default function AccountDetail(): JSX.Element {
         const cases = await window.api.queryGdprCases({ vendorId: d.vendor.id });
         setVendorCases(cases);
       })
-      .catch((err) => setError(err.message ?? "Failed to load"))
+      .catch((err) => setError(err.message ?? "Не удалось загрузить"))
       .finally(() => setLoading(false));
   }, [groupKey]);
 
@@ -502,11 +515,11 @@ export default function AccountDetail(): JSX.Element {
           className="btn btn-ghost btn-sm gap-1"
           onClick={() => navigate("/accounts", { state: accountNav ? { restore: accountNav.restoreState } : undefined })}
         >
-          <ArrowLeft className="w-4 h-4" /> Back to overview
+          <ArrowLeft className="w-4 h-4" /> Назад к списку
         </button>
         <div className="card bg-base-200">
           <div className="card-body text-center">
-            <p className="text-error">{error ?? "Vendor not found"}</p>
+            <p className="text-error">{error ?? "Компания не найдена"}</p>
           </div>
         </div>
       </div>
@@ -524,7 +537,7 @@ export default function AccountDetail(): JSX.Element {
   } = detail;
   const breaches = vendor.breachInfo ?? [];
   const anyLikelyAffected = breaches.some((b) => b.likelyAffected);
-  const displayName = vendor.name || vendor.root_domain || "Unknown";
+  const displayName = vendor.name || vendor.root_domain || "Неизвестно";
   const risk = vendor.risk_level ?? "unknown";
   const riskInfo = RISK_LEVELS[risk as keyof typeof RISK_LEVELS];
   const cat = vendor.category_id ?? "unknown";
@@ -541,7 +554,7 @@ export default function AccountDetail(): JSX.Element {
 
   const riskBadge = riskInfo?.badge ?? "⚪";
   const riskDescription =
-    riskInfo?.description ?? "Not enough data to determine a risk level";
+    riskInfo?.description ?? "Недостаточно данных для оценки риска";
   const hasRiskDetails =
     !!catInfo || !!(company?.runs && company.runs.length > 0);
 
@@ -819,7 +832,7 @@ export default function AccountDetail(): JSX.Element {
         if (!result.success) {
           setUnsubResult({
             ...unsubResult,
-            errorMessage: result.error ?? "Unsubscribed, but couldn't move emails to trash.",
+            errorMessage: result.error ?? "Отписка выполнена, но переместить письма в корзину не удалось.",
           });
           return;
         }
@@ -843,7 +856,7 @@ export default function AccountDetail(): JSX.Element {
       if (!result.success) {
         setUnsubResult({
           ...unsubResult,
-          errorMessage: result.error ?? "Failed to report spam.",
+          errorMessage: result.error ?? "Не удалось пометить как спам.",
         });
         return;
       }
@@ -881,7 +894,7 @@ export default function AccountDetail(): JSX.Element {
           // Stay in the failure modal but surface the new error.
           setUnsubResult({
             ...unsubResult,
-            errorMessage: result.error ?? "Could not send the unsubscribe email.",
+            errorMessage: result.error ?? "Не удалось отправить письмо об отписке.",
           });
         }
       } else {
@@ -913,7 +926,7 @@ export default function AccountDetail(): JSX.Element {
             kind: "success",
             fallbackMethods: [],
             trashAlso,
-            errorMessage: result.error ?? "Unsubscribed, but couldn't move emails to trash.",
+            errorMessage: result.error ?? "Отписка выполнена, но переместить письма в корзину не удалось.",
           });
           return;
         }
@@ -937,7 +950,7 @@ export default function AccountDetail(): JSX.Element {
       if (!result.success) {
         setUnsubCheck({
           ...unsubCheck,
-          errorMessage: result.error ?? "Failed to report spam.",
+          errorMessage: result.error ?? "Не удалось пометить как спам.",
         });
         return;
       }
@@ -959,7 +972,7 @@ export default function AccountDetail(): JSX.Element {
         ? await window.api.trashVendorMessages(detail.vendor.id)
         : await window.api.trashVendorMessages(detail.vendor.id, [...MARKETING_ACTION_TYPES]);
       if (!result.success) {
-        setDeleteError(result.error ?? "Failed to move emails to trash.");
+        setDeleteError(result.error ?? "Не удалось переместить письма в корзину.");
         return;
       }
       const doneId = pendingDelete === "all" ? "deleteAll" : "deleteMarketing";
@@ -1057,7 +1070,7 @@ export default function AccountDetail(): JSX.Element {
       setGdprSendOpen(undefined);
       navigate(`/cases/${created.id}`);
     } catch (err) {
-      setGdprSendError(errText(err, "Could not record the sent request."));
+      setGdprSendError(errText(err, "Не удалось записать отправленный запрос."));
     } finally {
       setActionLoading(false);
     }
@@ -1076,7 +1089,7 @@ export default function AccountDetail(): JSX.Element {
         requireSameMailbox(origin);
         await persistAccountEmail();
       } catch (err) {
-        setGdprSendError(errText(err, "Could not save the account email."));
+        setGdprSendError(errText(err, "Не удалось сохранить email аккаунта."));
         return;
       }
       requireSameMailbox(origin);
@@ -1091,14 +1104,14 @@ export default function AccountDetail(): JSX.Element {
         recovering,
       );
       if (result.status === "failed") {
-        setGdprSendError("Could not send the request.");
+        setGdprSendError("Не удалось отправить запрос.");
         return;
       }
       if (result.status === "no_recipient" || result.status === "active_case_exists") {
         setGdprSendError(
           result.status === "active_case_exists"
-            ? "An active request of this type already exists."
-            : "No recipient is available.",
+            ? "Активный запрос этого типа уже существует."
+            : "Нет получателя.",
         );
         return;
       }
@@ -1108,18 +1121,18 @@ export default function AccountDetail(): JSX.Element {
           requestType: dataRequestType,
           messageId: result.messageId,
         });
-        setGdprSendError("Request sent, but opening the case failed. Don't resend.");
+        setGdprSendError("Запрос отправлен, но открыть обращение не удалось. Не отправляйте повторно.");
         return;
       }
       if (result.status !== "sent" || result.caseId === undefined) {
-        setGdprSendError("Could not send the request.");
+        setGdprSendError("Не удалось отправить запрос.");
         return;
       }
       setGdprSendOpen(undefined);
       setPendingGdprRecord(undefined);
       navigate(`/cases/${result.caseId}`);
     } catch (err) {
-      setGdprSendError(errText(err, "Could not send the request."));
+      setGdprSendError(errText(err, "Не удалось отправить запрос."));
     } finally {
       setActionLoading(false);
     }
@@ -1134,7 +1147,7 @@ export default function AccountDetail(): JSX.Element {
             className="btn btn-ghost btn-sm gap-1"
             onClick={() => navigate("/accounts", { state: accountNav ? { restore: accountNav.restoreState } : undefined })}
           >
-            <ArrowLeft className="w-4 h-4" /> Back to overview
+            <ArrowLeft className="w-4 h-4" /> Назад к списку
           </button>
           {accountNav && (
             <>
@@ -1142,7 +1155,7 @@ export default function AccountDetail(): JSX.Element {
                 className="btn btn-ghost btn-sm btn-circle"
                 disabled={isFirstInList}
                 onClick={() => navigateToNeighbor("prev")}
-                title="Previous account"
+                title="Предыдущий аккаунт"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -1150,7 +1163,7 @@ export default function AccountDetail(): JSX.Element {
                 className="btn btn-ghost btn-sm btn-circle"
                 disabled={isLastInList}
                 onClick={() => navigateToNeighbor("next")}
-                title="Next account"
+                title="Следующий аккаунт"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -1163,13 +1176,13 @@ export default function AccountDetail(): JSX.Element {
             onClick={handleOpenWhitelistModal}
             disabled={!canOpenWhitelistModal || whitelistLoading}
           >
-            Add to whitelist
+            В белый список
           </button>
           <button
             className={`btn btn-sm ${vendor.status === "reviewed" ? "btn-ghost" : "btn-neutral"}`}
             onClick={handleToggleReviewed}
           >
-            {vendor.status === "reviewed" ? "Undo review" : "Mark as reviewed"}
+            {vendor.status === "reviewed" ? "Снять отметку" : "Отметить проверенным"}
           </button>
         </div>
       </div>
@@ -1182,19 +1195,19 @@ export default function AccountDetail(): JSX.Element {
             <BadgeCheck
               className="w-5 h-5 text-info shrink-0"
               strokeWidth={2}
-              aria-label="Verified company"
+              aria-label="Проверенная компания"
             />
           )}
           <button
             className="text-base-content/40 text-sm hover:text-base-content/70 hover:underline inline-flex items-center gap-1"
             onClick={() => window.api.openExternal(domainUrl)}
           >
-            {vendor.root_domain ?? "(unknown)"} <ExternalLink className="w-3 h-3" />
+            {vendor.root_domain ?? "(неизвестно)"} <ExternalLink className="w-3 h-3" />
           </button>
         </div>
         <p className="text-sm text-base-content/50 mt-1">
-          Review what this company knows about you and decide what to do. For older
-          accounts, consider unsubscribing and requesting data deletion.
+          Посмотрите, что эта компания знает о вас, и решите, что делать. Для старых
+          аккаунтов стоит отписаться и запросить удаление данных.
         </p>
         {company?.categories && company.categories.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -1216,23 +1229,23 @@ export default function AccountDetail(): JSX.Element {
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-4">
         <div>
-          <p className="text-xs text-base-content/50 uppercase">First seen</p>
+          <p className="text-xs text-base-content/50 uppercase">Впервые</p>
           <p className="font-medium">
-            {(first_activity ?? vendor.first_seen) ? formatAbsoluteDate(first_activity ?? vendor.first_seen ?? 0) : "Unknown"}
+            {(first_activity ?? vendor.first_seen) ? formatAbsoluteDate(first_activity ?? vendor.first_seen ?? 0) : "Неизвестно"}
           </p>
         </div>
         <div>
-          <p className="text-xs text-base-content/50 uppercase">Last seen</p>
+          <p className="text-xs text-base-content/50 uppercase">Последний раз</p>
           <p className="font-medium">
-            {vendor.last_seen ? formatRelativeDate(vendor.last_seen) : "Unknown"}
+            {vendor.last_seen ? formatRelativeDate(vendor.last_seen) : "Неизвестно"}
           </p>
         </div>
         <div>
-          <p className="text-xs text-base-content/50 uppercase">Emails</p>
+          <p className="text-xs text-base-content/50 uppercase">Письма</p>
           <p className="font-medium tabular-nums">{vendor.message_count}</p>
         </div>
         <div>
-          <p className="text-xs text-base-content/50 uppercase">Senders</p>
+          <p className="text-xs text-base-content/50 uppercase">Отправители</p>
           <p className="font-medium tabular-nums">{vendor.sender_count}</p>
         </div>
       </div>
@@ -1253,7 +1266,7 @@ export default function AccountDetail(): JSX.Element {
             />
             <span className="text-lg">{anyLikelyAffected ? "⚠️" : "ℹ️"}</span>
             <span className="font-semibold">
-              {anyLikelyAffected ? "Security alert" : "Past security incident"}
+              {anyLikelyAffected ? "Предупреждение безопасности" : "Инцидент безопасности в прошлом"}
             </span>
           </div>
           {breachOpen && (
@@ -1272,14 +1285,14 @@ export default function AccountDetail(): JSX.Element {
                     >
                       {bi.breach.title}
                     </button>{" "}
-                    was breached on{" "}
+                    — утечка{" "}
                     <span>
                       {new Date(bi.breach.breachDate).toLocaleDateString()}
                     </span>{" "}
                     —{" "}
                     {bi.likelyAffected
-                      ? "your data was likely on this list"
-                      : "your data was unlikely to be on this list"}
+                      ? "ваши данные, вероятно, попали в утечку"
+                      : "ваши данные, скорее всего, не пострадали"}
                     .
                   </li>
                 ))}
@@ -1306,7 +1319,7 @@ export default function AccountDetail(): JSX.Element {
                 ) : null;
               })()}
               <p className="text-xs text-base-content/50">
-                Source: haveibeenpwned.com
+                Источник: haveibeenpwned.com
               </p>
             </div>
           )}
@@ -1326,7 +1339,7 @@ export default function AccountDetail(): JSX.Element {
             } ${hasRiskDetails ? "" : "invisible"}`}
             strokeWidth={2}
           />
-          <span className="font-semibold shrink-0">Risk profile</span>
+          <span className="font-semibold shrink-0">Профиль риска</span>
           <span className="shrink-0">{riskBadge}</span>
           <span className="text-base-content/60 text-sm truncate">
             {riskDescription}
@@ -1336,7 +1349,7 @@ export default function AccountDetail(): JSX.Element {
           <div className="px-4 pb-4 space-y-4">
             {catInfo && (
               <div>
-                <p className="text-sm font-medium mb-3">Data they likely hold</p>
+                <p className="text-sm font-medium mb-3">Какие данные у них вероятно есть</p>
                 <div className="flex flex-wrap gap-2">
                   {catInfo.dataAtRisk.map((item) => (
                     <span key={item} className="badge badge-sm badge-soft">
@@ -1349,7 +1362,7 @@ export default function AccountDetail(): JSX.Element {
             {company?.runs && company.runs.length > 0 && (
               <div>
                 <p className="text-sm font-medium mb-3">
-                  {company.name} is also responsible for:
+                  {company.name} также управляет:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {company.runs.map((run) => (
@@ -1378,7 +1391,7 @@ export default function AccountDetail(): JSX.Element {
             className={tabClass(activeTab === "actions")}
             onClick={() => setActiveTab("actions")}
           >
-            Actions
+            Действия
           </button>
 
           <button
@@ -1387,7 +1400,7 @@ export default function AccountDetail(): JSX.Element {
             className={tabClass(activeTab === "data")}
             onClick={() => setActiveTab("data")}
           >
-            Data requests
+            Запросы о данных
           </button>
 
           <button
@@ -1396,7 +1409,7 @@ export default function AccountDetail(): JSX.Element {
             className={tabClass(activeTab === "emails")}
             onClick={() => setActiveTab("emails")}
           >
-            Emails
+            Письма
           </button>
 
           <button
@@ -1405,17 +1418,17 @@ export default function AccountDetail(): JSX.Element {
             className={tabClass(activeTab === "cases")}
             onClick={() => setActiveTab("cases")}
           >
-            Cases{vendorCases.length > 0 ? ` (${vendorCases.length})` : ""}
+            Обращения{vendorCases.length > 0 ? ` (${vendorCases.length})` : ""}
           </button>
 
-          <div className={hasAnyActivity ? "" : "tooltip tooltip-bottom"} data-tip={hasAnyActivity ? undefined : "No activity yet"}>
+          <div className={hasAnyActivity ? "" : "tooltip tooltip-bottom"} data-tip={hasAnyActivity ? undefined : "Пока нет действий"}>
             <button
               role="tab"
               aria-selected={activeTab === "activity"}
               className={`${tabClass(activeTab === "activity")} ${hasAnyActivity ? "" : "tab-disabled opacity-40 cursor-not-allowed"}`}
               onClick={() => { if (hasAnyActivity) setActiveTab("activity"); }}
             >
-              Activity
+              Журнал
             </button>
           </div>
         </div>
@@ -1423,7 +1436,7 @@ export default function AccountDetail(): JSX.Element {
         {/* Actions tab */}
         <div className={`tab-content mt-2 rounded-box bg-base-100/50 w-full px-4 py-3 ${activeTab === "actions" ? "!block" : ""}`}>
           {actionItems.length === 0 ? (
-            <p className="text-base-content/50 text-sm">No recommended actions for this company.</p>
+            <p className="text-base-content/50 text-sm">Для этой компании нет рекомендуемых действий.</p>
           ) : (
             <div>
               {/* Contextual recommendation blurb */}
@@ -1431,25 +1444,25 @@ export default function AccountDetail(): JSX.Element {
                 {(() => {
                   const parts: string[] = [];
                   if (anyLikelyAffected) {
-                    parts.push(`This sender was involved in a data breach that likely included your account. Your personal data may be at risk, so it is worth reviewing what was exposed and taking steps to protect yourself.`);
+                    parts.push(`Этот отправитель пострадал от утечки, которая, вероятно, затронула ваш аккаунт. Ваши данные могут быть под угрозой — стоит посмотреть, что утекло, и принять меры.`);
                   }
                   if (isAncientAccount) {
                     const yearsAgo = vendor.last_seen
                       ? Math.round((now - vendor.last_seen) / (365.25 * 24 * 60 * 60 * 1000))
                       : null;
-                    parts.push(`This sender last emailed you${yearsAgo ? ` over ${yearsAgo} years` : " a very long time"} ago. They may no longer exist, so it's worth checking before taking any further action.`);
+                    parts.push(`Этот отправитель последний раз писал вам${yearsAgo ? ` более ${yearsAgo} ${plural(yearsAgo, "года", "лет", "лет")}` : " очень давно"} назад. Возможно, компании уже нет — проверьте это, прежде чем что-то делать.`);
                   } else if (isStaleAccount) {
                     const yearsAgo = vendor.last_seen
                       ? Math.round((now - vendor.last_seen) / (365.25 * 24 * 60 * 60 * 1000))
                       : null;
-                    parts.push(`You haven't heard from this sender in${yearsAgo ? ` over ${yearsAgo} years` : " a long time"}, but they still hold your data. Requesting deletion removes any lingering risk.`);
+                    parts.push(`Этот отправитель не писал вам${yearsAgo ? ` более ${yearsAgo} ${plural(yearsAgo, "года", "лет", "лет")}` : " долгое время"}, но ваши данные у него остаются. Запрос на удаление снимет этот риск.`);
                   }
                   if (hasActiveSubscription) {
-                    parts.push(`This sender is still sending you marketing emails. Unsubscribing reduces clutter and cuts down the data they collect about you.`);
+                    parts.push(`Этот отправитель всё ещё присылает рекламу. Отписка уменьшит мусор в почте и объём данных, которые о вас собирают.`);
                   }
                   if ((showDeleteMarketing || showDeleteAll) && !hasActiveSubscription && !isStaleAccount && !isAncientAccount && !anyLikelyAffected) {
-                    const base = `Deleting these emails removes personal data tied to this sender from your inbox.`;
-                    parts.push(totalCount > 100 ? `This sender has sent you a lot of emails over time. ${base}` : base);
+                    const base = `Удаление этих писем уберёт из вашей почты личные данные, связанные с этим отправителем.`;
+                    parts.push(totalCount > 100 ? `Этот отправитель прислал вам очень много писем. ${base}` : base);
                   }
                   return parts.join(" ");
                 })()}
@@ -1458,12 +1471,12 @@ export default function AccountDetail(): JSX.Element {
               {anyLikelyAffected && (
                 <ActionTaskRow
                   index={stepNumber("breachReview")}
-                  label="Review the security incident"
-                  description="Check what data was exposed in this breach. See the Security alert on this page for details."
+                  label="Изучите инцидент безопасности"
+                  description="Проверьте, какие данные утекли. Подробности — в предупреждении безопасности на этой странице."
                   done={doneIds.has("breachReview")}
                   spinning={false}
                   anyLoading={actionLoading}
-                  actionLabel="Review"
+                  actionLabel="Посмотреть"
                   variant="warning"
                   onAction={() => handleItemAction("breachReview")}
                 />
@@ -1471,24 +1484,24 @@ export default function AccountDetail(): JSX.Element {
               {anyLikelyAffected && (
                 <ActionTaskRow
                   index={stepNumber("breachAccess")}
-                  label="Request your data"
-                  description="Request this sender to share all data they hold about you. Opens a pre-filled request in the Data requests tab."
+                  label="Запросить свои данные"
+                  description="Попросить отправителя предоставить все данные о вас. Откроется заполненный запрос на вкладке «Запросы о данных»."
                   done={doneIds.has("breachAccess")}
                   spinning={false}
                   anyLoading={actionLoading}
-                  actionLabel="Open"
+                  actionLabel="Открыть"
                   onAction={() => handleItemAction("breachAccess")}
                 />
               )}
               {anyLikelyAffected && (
                 <ActionTaskRow
                   index={stepNumber("breachDeletion")}
-                  label="Request to delete your data"
-                  description="Request this sender to erase all data they hold about you. Opens a pre-filled request in the Data requests tab."
+                  label="Запросить удаление данных"
+                  description="Попросить отправителя удалить все данные о вас. Откроется заполненный запрос на вкладке «Запросы о данных»."
                   done={doneIds.has("breachDeletion")}
                   spinning={false}
                   anyLoading={actionLoading}
-                  actionLabel="Open"
+                  actionLabel="Открыть"
                   onAction={() => handleItemAction("breachDeletion")}
                 />
               )}
@@ -1498,12 +1511,12 @@ export default function AccountDetail(): JSX.Element {
                   <ActionTaskRow
                     key={id}
                     index={stepNumber(id)}
-                    label="Unsubscribe"
+                    label="Отписаться"
                     description={`${unsubTarget(entry)} · ${methodDescription(entry.method, entry.url)}`}
                     done={doneIds.has(id)}
                     spinning={activeItemId === id && actionLoading}
                     anyLoading={actionLoading}
-                    actionLabel="Unsubscribe"
+                    actionLabel="Отписаться"
                     onAction={() => handleItemAction(id)}
                   />
                 );
@@ -1511,8 +1524,8 @@ export default function AccountDetail(): JSX.Element {
               {groupUnsubs && (
                 <ActionGroup
                   index={stepNumber("unsub")}
-                  label="Unsubscribe"
-                  description={`Emails come from ${unsubMethods.length} different addresses`}
+                  label="Отписаться"
+                  description={`Письма приходят с ${unsubMethods.length} ${plural(unsubMethods.length, "адреса", "адресов", "адресов")}`}
                   doneCount={unsubMethods.filter((m) => doneIds.has(`unsub-${m.url}`)).length}
                   total={unsubMethods.length}
                 >
@@ -1526,7 +1539,7 @@ export default function AccountDetail(): JSX.Element {
                         done={doneIds.has(id)}
                         spinning={activeItemId === id && actionLoading}
                         anyLoading={actionLoading}
-                        actionLabel="Unsubscribe"
+                        actionLabel="Отписаться"
                         onAction={() => handleItemAction(id)}
                       />
                     );
@@ -1536,48 +1549,48 @@ export default function AccountDetail(): JSX.Element {
               {showDeleteMarketing && (
                 <ActionTaskRow
                   index={stepNumber("deleteMarketing")}
-                  label="Delete marketing emails"
-                  description={`Moves ${bulkCount} marketing and newsletter emails to trash`}
+                  label="Удалить рекламные письма"
+                  description={`Переместит в корзину рекламные и новостные письма: ${bulkCount}`}
                   done={doneIds.has("deleteMarketing")}
                   spinning={activeItemId === "deleteMarketing" && actionLoading}
                   anyLoading={actionLoading}
-                  actionLabel="Delete"
+                  actionLabel="Удалить"
                   onAction={() => handleItemAction("deleteMarketing")}
                 />
               )}
               {showDeleteAll && (
                 <ActionTaskRow
                   index={stepNumber("deleteAll")}
-                  label="Delete all emails"
-                  description={`Moves all ${vendor.message_count} emails from this sender to trash, including receipts and notifications`}
+                  label="Удалить все письма"
+                  description={`Переместит в корзину все письма от этого отправителя (${vendor.message_count}), включая чеки и уведомления`}
                   done={doneIds.has("deleteAll")}
                   spinning={activeItemId === "deleteAll" && actionLoading}
                   anyLoading={actionLoading}
-                  actionLabel="Delete"
+                  actionLabel="Удалить"
                   onAction={() => handleItemAction("deleteAll")}
                 />
               )}
               {isAncientAccount && !anyLikelyAffected && (
                 <ActionTaskRow
                   index={stepNumber("checkActive")}
-                  label="Check if this company is still active"
-                  description="This sender may no longer exist. Visit their website to verify before taking further action."
+                  label="Проверьте, работает ли ещё компания"
+                  description="Возможно, этой компании уже нет. Зайдите на их сайт, прежде чем что-то делать."
                   done={doneIds.has("checkActive")}
                   spinning={false}
                   anyLoading={actionLoading}
-                  actionLabel="Visit website"
+                  actionLabel="Открыть сайт"
                   onAction={() => handleItemAction("checkActive")}
                 />
               )}
               {isStaleAccount && !anyLikelyAffected && (
                 <ActionTaskRow
                   index={stepNumber("dataDeletion")}
-                  label="Request to delete your data"
-                  description="Request this sender to erase all data they hold about you. Opens a pre-filled request in the Data requests tab."
+                  label="Запросить удаление данных"
+                  description="Попросить отправителя удалить все данные о вас. Откроется заполненный запрос на вкладке «Запросы о данных»."
                   done={doneIds.has("dataDeletion")}
                   spinning={false}
                   anyLoading={actionLoading}
-                  actionLabel="Open"
+                  actionLabel="Открыть"
                   onAction={() => handleItemAction("dataDeletion")}
                 />
               )}
@@ -1601,7 +1614,7 @@ export default function AccountDetail(): JSX.Element {
                 className="btn btn-primary btn-sm gap-1"
                 onClick={() => window.api.openExternal(company.webform!)}
               >
-                Open privacy form <ExternalLink className="w-3.5 h-3.5" />
+                Открыть форму запроса о данных <ExternalLink className="w-3.5 h-3.5" />
               </button>
               {contactEmail && (deletionEmail || accessEmail) && <hr className="border-base-100 mt-2 mb-4" />}
             </>
@@ -1611,35 +1624,35 @@ export default function AccountDetail(): JSX.Element {
             <>
               {!company && (
                 <p className="text-base-content/50 text-xs">
-                  This contact address is not verified. We recommend checking their privacy policy before sending a request.
+                  Этот контактный адрес не проверен. Перед отправкой запроса рекомендуем свериться с их политикой конфиденциальности.
                 </p>
               )}
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Language</label>
+                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Язык письма</label>
                   <select
                     className="select select-bordered select-sm"
                     value={emailLanguage}
                     onChange={(e) => { setEmailLanguage(e.target.value); setCopiedField(null); }}
                   >
                     {Object.entries(LANGUAGES).map(([code, { label, flag }]) => (
-                      <option key={code} value={code}>{flag}  {label}</option>
+                      <option key={code} value={code}>{flag}  {LANGUAGE_LABELS_RU[code] ?? label}</option>
                     ))}
                   </select>
                 </div>
                 <div className="flex items-center gap-3">
-                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Purpose</label>
+                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Цель</label>
                   <select
                     className="select select-bordered select-sm"
                     value={dataRequestType}
                     onChange={(e) => { setDataRequestType(e.target.value as "access" | "deletion"); setCopiedField(null); }}
                   >
-                    <option value="deletion">Request data deletion</option>
-                    <option value="access">Request data access</option>
+                    <option value="deletion">Запрос на удаление данных</option>
+                    <option value="access">Запрос на доступ к данным</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-3">
-                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Account email</label>
+                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Email аккаунта</label>
                   <input
                     type="email"
                     className="input input-bordered input-sm"
@@ -1650,15 +1663,15 @@ export default function AccountDetail(): JSX.Element {
                   />
                   <span
                     className="tooltip tooltip-top tooltip-left shrink-0 text-base-content/40"
-                    data-tip="The address this company knows you by, for example a hide-my-email alias. Note that you will still send from your connected account."
+                    data-tip="Адрес, под которым вас знает эта компания, например псевдоним скрытой почты. Отправка всё равно идёт с подключённого аккаунта."
                   >
-                    <Info className="w-3.5 h-3.5" aria-label="About account email" />
+                    <Info className="w-3.5 h-3.5" aria-label="Об email аккаунта" />
                   </span>
                 </div>
                 {detail.receivedAddresses.length > 0 && (
                   <div className="flex items-start gap-3">
                     <span className="text-xs text-base-content/50 uppercase shrink-0 w-28 pt-1">
-                      Received on
+                      Получено на
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {detail.receivedAddresses.map((entry) => (
@@ -1670,7 +1683,7 @@ export default function AccountDetail(): JSX.Element {
                               ? "btn-primary"
                               : "btn-ghost border border-base-300"
                           }`}
-                          title={`${entry.message_count} message${entry.message_count === 1 ? "" : "s"}, last on ${new Date(entry.last_seen).toLocaleDateString()}`}
+                          title={`${entry.message_count} ${plural(entry.message_count, "письмо", "письма", "писем")}, последнее ${new Date(entry.last_seen).toLocaleDateString()}`}
                           onClick={() => {
                             setRequestEmail(entry.address);
                             setCopiedField(null);
@@ -1687,27 +1700,27 @@ export default function AccountDetail(): JSX.Element {
                   </div>
                 )}
                 <div className="flex items-center gap-3">
-                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Name</label>
+                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Имя</label>
                   <input
                     type="text"
                     className="input input-bordered input-sm"
-                    placeholder="Your full name"
+                    placeholder="Ваше полное имя"
                     value={userName}
                     onChange={(e) => { setUserName(e.target.value); setCopiedField(null); }}
                     onBlur={() => window.api.saveSettings({ userName })}
                   />
-                  <span className="text-xs text-base-content/40 shrink-0">(optional)</span>
+                  <span className="text-xs text-base-content/40 shrink-0">(необязательно)</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">Account ID</label>
+                  <label className="text-xs text-base-content/50 uppercase shrink-0 w-28">ID аккаунта</label>
                   <input
                     type="text"
                     className="input input-bordered input-sm"
-                    placeholder="Username, customer/reference id, etc."
+                    placeholder="Логин, номер клиента/договора и т. п."
                     value={accountIdentifier}
                     onChange={(e) => { setAccountIdentifier(e.target.value); setCopiedField(null); }}
                   />
-                  <span className="text-xs text-base-content/40 shrink-0">(optional)</span>
+                  <span className="text-xs text-base-content/40 shrink-0">(необязательно)</span>
                 </div>
               </div>
               {(() => {
@@ -1716,14 +1729,14 @@ export default function AccountDetail(): JSX.Element {
                 return (
                   <>
                     <div>
-                      <p className="text-base-content/50 text-xs uppercase mb-1">To</p>
+                      <p className="text-base-content/50 text-xs uppercase mb-1">Кому</p>
                       <div className="flex items-center gap-2">
                         <input
                           type="email"
                           className="input input-bordered input-sm font-mono w-full max-w-md"
                           placeholder={
                             contactEmail && isNoReplyEmail(contactEmail)
-                              ? `${contactEmail} is a no-reply address`
+                              ? `${contactEmail} — адрес без ответа (no-reply)`
                               : "recipient@example.com"
                           }
                           value={recipientEmail}
@@ -1733,27 +1746,27 @@ export default function AccountDetail(): JSX.Element {
                           className="btn btn-ghost btn-xs px-1"
                           onClick={() => handleCopyField(recipientEmail, "to")}
                           disabled={!recipientEmail}
-                          title="Copy"
+                          title="Копировать"
                         >
                           {copiedField === "to" ? <span className="text-xs text-success">✓</span> : <Clipboard className="w-3.5 h-3.5 text-base-content/40" />}
                         </button>
                       </div>
                     </div>
                     <div>
-                      <p className="text-base-content/50 text-xs uppercase mb-1">Subject</p>
+                      <p className="text-base-content/50 text-xs uppercase mb-1">Тема</p>
                       <div className="flex items-center gap-2">
                         <p>{email.subject}</p>
                         <button
                           className="btn btn-ghost btn-xs px-1"
                           onClick={() => handleCopyField(email.subject, "subject")}
-                          title="Copy"
+                          title="Копировать"
                         >
                           {copiedField === "subject" ? <span className="text-xs text-success">✓</span> : <Clipboard className="w-3.5 h-3.5 text-base-content/40" />}
                         </button>
                       </div>
                     </div>
                     <div>
-                      <p className="text-base-content/50 text-xs uppercase mb-1">Message</p>
+                      <p className="text-base-content/50 text-xs uppercase mb-1">Письмо</p>
                       <pre className="whitespace-pre-wrap text-base-content/80 bg-base-100 rounded-lg p-3 mt-1">
                         {email.body}
                       </pre>
@@ -1768,14 +1781,14 @@ export default function AccountDetail(): JSX.Element {
                           setGdprSendOpen("send");
                         }}
                       >
-                        Send request
+                        Отправить запрос
                       </button>
                       <button
                         className="btn btn-neutral btn-sm gap-1"
                         onClick={() => handleCopyField(email.body, "body")}
                       >
                         {copiedField === "body" ? <span className="text-success">✓</span> : <Clipboard className="w-3.5 h-3.5" />}
-                        {copiedField === "body" ? "Copied!" : "Copy message"}
+                        {copiedField === "body" ? "Скопировано!" : "Копировать письмо"}
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"
@@ -1786,16 +1799,16 @@ export default function AccountDetail(): JSX.Element {
                           setGdprSendOpen("record");
                         }}
                       >
-                        I sent this today
+                        Я отправил(а) сегодня
                       </button>
                     </div>
                     {!canSend && (
                       <p className="text-xs text-base-content/50">
-                        This account can&apos;t send email on its own.{" "}
+                        Этот аккаунт не может отправлять письма.{" "}
                         <button className="link" onClick={() => navigate("/settings")}>
-                          Connect an account with SMTP
+                          Подключите аккаунт с SMTP
                         </button>{" "}
-                        to send from Paperweight, or copy the message and send it yourself.
+                        для отправки из Paperweight или скопируйте письмо и отправьте сами.
                       </p>
                     )}
                   </>
@@ -1804,7 +1817,7 @@ export default function AccountDetail(): JSX.Element {
             </>
           ) : (
             <p className="text-base-content/50">
-              No contact information available for data requests.
+              Нет контактов для запросов о данных.
             </p>
           )}
         </div>
@@ -1818,7 +1831,7 @@ export default function AccountDetail(): JSX.Element {
             />
           ) : (
             <p className="text-base-content/50 text-sm px-4 py-2">
-              No emails found.
+              Письма не найдены.
             </p>
           )}
         </div>
@@ -1827,7 +1840,7 @@ export default function AccountDetail(): JSX.Element {
         <div className={`tab-content mt-2 rounded-box bg-base-100/50 w-full px-4 py-3 ${activeTab === "cases" ? "!block" : ""}`}>
           {vendorCases.length === 0 ? (
             <p className="text-sm text-base-content/50">
-              No cases yet. Send or record a request in the Data requests tab to start tracking.
+              Обращений пока нет. Отправьте или запишите запрос на вкладке «Запросы о данных», чтобы начать отслеживание.
             </p>
           ) : (
             <div className="space-y-2">
@@ -1847,14 +1860,14 @@ export default function AccountDetail(): JSX.Element {
         <div className={`tab-content mt-2 rounded-box bg-base-100/50 w-full px-4 py-3 ${activeTab === "activity" ? "!block" : ""}`}>
           {!hasAnyActivity ? (
             <p className="text-sm text-base-content/50">
-              No actions taken yet.
+              Действий пока не было.
             </p>
           ) : (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold mb-2">Activity logs</h3>
+                <h3 className="text-sm font-semibold mb-2">Журнал действий</h3>
                 {sortedActivityLog.length === 0 ? (
-                  <p className="text-sm text-base-content/50">No log entries yet.</p>
+                  <p className="text-sm text-base-content/50">Записей пока нет.</p>
                 ) : (
                   <div className="font-mono text-sm divide-y divide-base-300">
                     {sortedActivityLog.map((entry) => (
@@ -1884,7 +1897,7 @@ export default function AccountDetail(): JSX.Element {
                         <span className="text-base-content/40 text-right shrink-0">
                           {entry.messageCount > 0 && (
                             <>
-                              {entry.messageCount.toLocaleString()} emails
+                              {entry.messageCount.toLocaleString()} {plural(entry.messageCount, "письмо", "письма", "писем")}
                               {entry.sizeBytes > 0 &&
                                 ` · ${formatBytes(entry.sizeBytes)}`}
                             </>
@@ -1897,19 +1910,19 @@ export default function AccountDetail(): JSX.Element {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold mb-2">Whitelist</h3>
+                <h3 className="text-sm font-semibold mb-2">Белый список</h3>
                 {sortedWhitelistEntries.length === 0 ? (
-                  <p className="text-sm text-base-content/50">No whitelisted email or domain for this account.</p>
+                  <p className="text-sm text-base-content/50">Для этого аккаунта в белом списке нет адресов или доменов.</p>
                 ) : (
                   <div className="space-y-4">
                     <WhitelistSection
-                      title="Domains"
+                      title="Домены"
                       entries={domainWhitelistEntries}
                       isLoading={whitelistLoading}
                       onRemove={handleWhitelistRemove}
                     />
                     <WhitelistSection
-                      title="Emails"
+                      title="Адреса"
                       entries={emailWhitelistEntries}
                       isLoading={whitelistLoading}
                       onRemove={handleWhitelistRemove}
@@ -1926,13 +1939,13 @@ export default function AccountDetail(): JSX.Element {
       {whitelistModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-lg mb-4">Add to whitelist</h3>
+            <h3 className="font-bold text-lg mb-4">Добавить в белый список</h3>
             <div className="text-sm text-base-content/80 space-y-3">
-              <p>Select an email address or domain to whitelist.</p>
+              <p>Выберите адрес или домен для белого списка.</p>
               <div className="space-y-3">
                 {addableDomainWhitelistOptions.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-2">Domains</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-2">Домены</h4>
                     <div className="space-y-2">
                       {addableDomainWhitelistOptions.map((option) => (
                         <label key={option} className="flex items-center gap-2 cursor-pointer">
@@ -1951,7 +1964,7 @@ export default function AccountDetail(): JSX.Element {
 
                 {addableEmailWhitelistOptions.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-2">Emails</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-base-content/60 mb-2">Адреса</h4>
                     <div className="space-y-2">
                       {addableEmailWhitelistOptions.map((option) => (
                         <label key={option} className="flex items-center gap-2 cursor-pointer">
@@ -1980,7 +1993,7 @@ export default function AccountDetail(): JSX.Element {
                 }}
                 disabled={whitelistLoading}
               >
-                Cancel
+                Отмена
               </button>
               <button
                 className="btn btn-sm btn-primary"
@@ -1990,7 +2003,7 @@ export default function AccountDetail(): JSX.Element {
                 {whitelistLoading ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  "Add"
+                  "Добавить"
                 )}
               </button>
             </div>
@@ -2006,7 +2019,7 @@ export default function AccountDetail(): JSX.Element {
               }}
               disabled={whitelistLoading}
             >
-              close
+              закрыть
             </button>
           </form>
         </div>
@@ -2015,8 +2028,8 @@ export default function AccountDetail(): JSX.Element {
       {pendingDelete && (
         <ActionModal
           isOpen
-          title={pendingDelete === "all" ? "Delete all emails" : "Delete marketing emails"}
-          confirmLabel="Move to trash"
+          title={pendingDelete === "all" ? "Удалить все письма" : "Удалить рекламные письма"}
+          confirmLabel="В корзину"
           confirmVariant="primary"
           onConfirm={handleDeleteConfirm}
           onCancel={() => {
@@ -2031,21 +2044,21 @@ export default function AccountDetail(): JSX.Element {
         >
           {pendingDelete === "all" ? (
             <>
-              <p>Move all <strong>{vendor.message_count}</strong> emails from <strong>{displayName}</strong> to trash? This includes all email types.</p>
+              <p>Переместить все письма (<strong>{vendor.message_count}</strong>) от <strong>{displayName}</strong> в корзину? Это касается писем всех типов.</p>
               <p className="text-xs text-base-content/60">
-                This moves every message to trash, not just marketing mail, and can't be undone from here. If you only want to clear a subset (e.g. old receipts) or want a dedicated cleanup tool, see our{" "}
+                В корзину попадут все письма, а не только реклама, и отменить это отсюда нельзя. Если нужно удалить только часть (например, старые чеки) или нужен специальный инструмент очистки, см. наше{" "}
                 <button
                   type="button"
                   className="link link-hover inline"
                   onClick={() => window.api.openExternal(CLEANUP_GUIDE_URL)}
                 >
-                  email cleanup tools comparison
+                  сравнение инструментов очистки почты (англ.)
                 </button>
-                {" "}or use your email provider's own tools instead.
+                {" "}или воспользуйтесь средствами вашего почтового сервиса.
               </p>
             </>
           ) : (
-            <p>Move marketing emails from <strong>{displayName}</strong> to trash?</p>
+            <p>Переместить рекламные письма от <strong>{displayName}</strong> в корзину?</p>
           )}
         </ActionModal>
       )}
@@ -2054,11 +2067,11 @@ export default function AccountDetail(): JSX.Element {
       {gdprSendOpen && (
         <ActionModal
           isOpen
-          title={gdprSendOpen === "record" ? "Record sent request" : dataRequestType === "access" ? "Send access request" : "Send deletion request"}
+          title={gdprSendOpen === "record" ? "Записать отправленный запрос" : dataRequestType === "access" ? "Отправить запрос на доступ" : "Отправить запрос на удаление"}
           confirmLabel={
             isGdprSendRecovery(pendingGdprRecord, groupKey, dataRequestType) || gdprSendOpen === "record"
-              ? "Record request"
-              : "Send"
+              ? "Записать запрос"
+              : "Отправить"
           }
           confirmVariant="primary"
           onConfirm={gdprSendOpen === "record" ? handleRecordRequest : handleGdprSend}
@@ -2068,17 +2081,17 @@ export default function AccountDetail(): JSX.Element {
         >
           {gdprSendOpen === "record" ? (
             <p>
-              Confirm that you sent the displayed request to <strong>{recipientEmail}</strong> today.
-              Paperweight will save a local case with today as the request date.
+              Подтвердите, что сегодня отправили показанный запрос на <strong>{recipientEmail}</strong>.
+              Paperweight сохранит локальное обращение с сегодняшней датой запроса.
             </p>
           ) : (
             <p>
               {isGdprSendRecovery(pendingGdprRecord, groupKey, dataRequestType)
-                ? <>The request was sent to <strong>{recipientEmail}</strong>. Recording it locally failed — retry recording only, don't send again.</>
+                ? <>Запрос отправлен на <strong>{recipientEmail}</strong>, но сохранить его локально не удалось — повторите только запись, не отправляйте снова.</>
                 : <>
-              Paperweight will send this request from your account to{" "}
-              <strong>{recipientEmail}</strong> and open a case to track the
-              response deadlines.
+              Paperweight отправит этот запрос с вашего аккаунта на{" "}
+              <strong>{recipientEmail}</strong> и откроет обращение для контроля
+              сроков ответа.
                 </>}
             </p>
           )}
@@ -2089,8 +2102,8 @@ export default function AccountDetail(): JSX.Element {
       {pendingUnsub && (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          confirmLabel="Unsubscribe"
+          title="Отписка"
+          confirmLabel="Отписаться"
           confirmVariant="primary"
           onConfirm={handleUnsubscribeConfirm}
           onCancel={() => {
@@ -2106,8 +2119,8 @@ export default function AccountDetail(): JSX.Element {
       {unsubResult?.kind === "success" && (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          confirmLabel="Done"
+          title="Отписка"
+          confirmLabel="Готово"
           confirmVariant="primary"
           onConfirm={handleUnsubResultDone}
           onCancel={() => {
@@ -2122,7 +2135,7 @@ export default function AccountDetail(): JSX.Element {
           loading={actionLoading}
         >
           <p>
-            Successfully unsubscribed from <strong>{displayName}</strong>.
+            Вы отписались от <strong>{displayName}</strong>.
           </p>
           {unsubResult.errorMessage && (
             <p className="text-error text-sm">{unsubResult.errorMessage}</p>
@@ -2138,7 +2151,7 @@ export default function AccountDetail(): JSX.Element {
                 )
               }
             />
-            <span>Also move all emails to trash</span>
+            <span>Также переместить все письма в корзину</span>
           </label>
         </ActionModal>
       )}
@@ -2147,8 +2160,8 @@ export default function AccountDetail(): JSX.Element {
       {unsubResult?.kind === "failure" && (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          secondaryLabel="Mark as spam"
+          title="Отписка"
+          secondaryLabel="Пометить как спам"
           secondaryVariant="neutral"
           onSecondary={handleUnsubResultSpam}
           onCancel={() => {
@@ -2157,7 +2170,7 @@ export default function AccountDetail(): JSX.Element {
           loading={actionLoading}
         >
           <p>
-            Couldn't automatically unsubscribe from{" "}
+            Не удалось автоматически отписаться от{" "}
             <strong>{displayName}</strong>.
           </p>
           {unsubResult.errorMessage && (
@@ -2165,7 +2178,7 @@ export default function AccountDetail(): JSX.Element {
           )}
           {unsubResult.fallbackMethods.length > 0 && (
             <div className="space-y-2 mt-1">
-              <p className="text-base-content/60">Try another method:</p>
+              <p className="text-base-content/60">Попробуйте другой способ:</p>
               {unsubResult.fallbackMethods.map((entry) => (
                 <div
                   key={entry.method}
@@ -2179,7 +2192,7 @@ export default function AccountDetail(): JSX.Element {
                     disabled={actionLoading}
                     onClick={() => handleUnsubResultFallback(entry)}
                   >
-                    Try
+                    Попробовать
                   </button>
                 </div>
               ))}
@@ -2192,10 +2205,10 @@ export default function AccountDetail(): JSX.Element {
       {unsubCheck && (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          secondaryLabel="No, mark as spam"
+          title="Отписка"
+          secondaryLabel="Нет, пометить как спам"
           secondaryVariant="neutral"
-          confirmLabel="Yes, mark done"
+          confirmLabel="Да, готово"
           confirmVariant="primary"
           onSecondary={handleUnsubCheckSpam}
           onConfirm={handleUnsubCheckDone}
@@ -2205,7 +2218,7 @@ export default function AccountDetail(): JSX.Element {
           loading={actionLoading}
         >
           <p>
-            Did you successfully unsubscribe from <strong>{displayName}</strong>
+            Удалось отписаться от <strong>{displayName}</strong>
             ?
           </p>
           {unsubCheck.errorMessage && (
@@ -2222,7 +2235,7 @@ export default function AccountDetail(): JSX.Element {
                 )
               }
             />
-            <span>Also move all emails to trash when marking unsubscribe done</span>
+            <span>При подтверждении отписки также переместить все письма в корзину</span>
           </label>
         </ActionModal>
       )}

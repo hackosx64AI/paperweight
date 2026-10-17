@@ -1,10 +1,11 @@
 import type { SyncStatus } from "@shared/types";
+import { plural } from "@shared/formatting";
 
 function formatSyncPeriod(start: number, end: number): string {
   const startDate = new Date(start);
   const endDate = new Date(end);
-  const startMonth = startDate.toLocaleDateString("en-US", { month: "short" });
-  const endMonth = endDate.toLocaleDateString("en-US", { month: "short" });
+  const startMonth = startDate.toLocaleDateString("ru-RU", { month: "short" });
+  const endMonth = endDate.toLocaleDateString("ru-RU", { month: "short" });
   const startYear = startDate.getFullYear();
   const endYear = endDate.getFullYear();
 
@@ -22,7 +23,7 @@ export function formatRunningSyncStatus(
   now = Date.now(),
 ): string {
   const details = [
-    `${status.progress.toLocaleString()} messages processed`,
+    `обработано ${status.progress.toLocaleString()} ${plural(status.progress, "письмо", "письма", "писем")}`,
   ];
   if (status.periodStart !== undefined && status.periodEnd !== undefined) {
     details.push(formatSyncPeriod(status.periodStart, status.periodEnd));
@@ -32,9 +33,9 @@ export function formatRunningSyncStatus(
       0,
       Math.floor((now - status.startedAt) / 60_000),
     );
-    details.push(`${elapsedMinutes}m elapsed`);
+    details.push(`прошло ${elapsedMinutes} мин`);
   }
-  return `Syncing... ${details.join(" · ")}`;
+  return `Синхронизация... ${details.join(" · ")}`;
 }
 
 export function isOAuthTokenError(error?: string): boolean {
@@ -42,6 +43,6 @@ export function isOAuthTokenError(error?: string): boolean {
     error &&
     (error.includes("Gmail authorization expired") ||
       error.includes("Failed to refresh access token") ||
-      error.includes("Authorization expired. Reconnect your account"))
+      error.includes("Авторизация истекла. Переподключите аккаунт"))
   );
 }

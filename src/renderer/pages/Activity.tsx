@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ActivityEntry } from "@shared/types";
-import { formatAbsoluteDate, formatBytes } from "@shared/formatting";
+import { formatAbsoluteDate, formatBytes, plural } from "@shared/formatting";
 import Pagination from "../components/Pagination";
 import { ACTION_COLORS, activityEntryLabel } from "../utils/activityLabels";
 
@@ -31,7 +31,7 @@ export default function Activity(): JSX.Element {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Activity log</h1>
+      <h1 className="text-2xl font-bold">Журнал действий</h1>
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
@@ -39,7 +39,7 @@ export default function Activity(): JSX.Element {
         </div>
       ) : entries.length === 0 ? (
         <p className="text-base-content/50 text-sm">
-          No activity yet. Actions you take on mailing lists will appear here.
+          Пока нет действий. Здесь появятся ваши действия с рассылками.
         </p>
       ) : (
         <>
@@ -50,7 +50,7 @@ export default function Activity(): JSX.Element {
               return (
                 <div
                   key={entry.id}
-                  className="grid grid-cols-[130px_160px_1fr_auto] items-center gap-4 py-2"
+                  className="grid grid-cols-[130px_240px_1fr_auto] items-center gap-4 py-2"
                 >
                   <span className="text-base-content/40 shrink-0">
                     {formatAbsoluteDate(entry.actionedAt)}
@@ -76,7 +76,7 @@ export default function Activity(): JSX.Element {
                   <span className="text-base-content/40 text-right shrink-0">
                     {entry.messageCount > 0 && (
                       <>
-                        {entry.messageCount.toLocaleString()} emails
+                        {entry.messageCount.toLocaleString()} {plural(entry.messageCount, "письмо", "письма", "писем")}
                         {entry.sizeBytes > 0 && ` · ${formatBytes(entry.sizeBytes)}`}
                       </>
                     )}

@@ -274,7 +274,7 @@ export async function updateServerConfig(
 ): Promise<{ success: boolean; error?: string }> {
   const creds = loadCredentials();
   if (!creds?.imap) {
-    return { success: false, error: "No IMAP account to update" };
+    return { success: false, error: "Нет IMAP-аккаунта для обновления" };
   }
 
   const imapCfg: ImapConfig = {
@@ -432,7 +432,7 @@ async function bulkActionVendorMessages(
         if (failed) {
           return {
             success: false,
-            error: "One or more mailbox operations failed. Local records were kept.",
+            error: "Часть операций с почтовым ящиком не выполнена. Локальные записи сохранены.",
           };
         }
         const { count } = deleteVendorMessages(vendorId, types);
@@ -443,7 +443,7 @@ async function bulkActionVendorMessages(
         return { success: true };
       } catch (err) {
         actionLog.error(`${label}: error (vendor ${vendorId}): ${err instanceof Error ? err.message : String(err)}`);
-        return { success: false, error: "The mailbox operation failed. Local records were kept." };
+        return { success: false, error: "Операция с почтовым ящиком не выполнена. Локальные записи сохранены." };
       } finally {
         try {
           await p.disconnect();

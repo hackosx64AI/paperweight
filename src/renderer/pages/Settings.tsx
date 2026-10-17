@@ -149,12 +149,12 @@ export default function Settings(): JSX.Element {
       const status = await window.api.activateLicense(key);
       await refreshLicense();
       if (!status.active) {
-        setLicenseError("Invalid or expired license key.");
+        setLicenseError("Неверный или просроченный лицензионный ключ.");
       } else {
         setLicenseKey("");
       }
     } catch (err) {
-      setLicenseError(err instanceof Error ? err.message : "Activation failed");
+      setLicenseError(err instanceof Error ? err.message : "Не удалось активировать");
     } finally {
       setLicenseLoading(false);
     }
@@ -182,7 +182,7 @@ export default function Settings(): JSX.Element {
       setShowWipeModal(false);
     } catch {
       setDeletionError(
-        "Paperweight could not delete all local data. Close other programs using these files and try again.",
+        "Paperweight не удалось удалить все локальные данные. Закройте программы, использующие эти файлы, и попробуйте снова.",
       );
     } finally {
       setWipeInProgress(false);
@@ -218,7 +218,7 @@ export default function Settings(): JSX.Element {
     if (type === "gmail") return "Google";
     if (type === "microsoft") return "Microsoft";
     if (type === "imap") return "IMAP";
-    return "Not connected";
+    return "Не подключено";
   };
 
   const formatDate = (ts?: number): string => {
@@ -231,7 +231,7 @@ export default function Settings(): JSX.Element {
   };
 
   const formatDateTime = (ts?: number): string => {
-    if (!ts) return "Never";
+    if (!ts) return "Никогда";
     return new Date(ts).toLocaleString(undefined, {
       month: "short",
       day: "numeric",
@@ -241,11 +241,11 @@ export default function Settings(): JSX.Element {
   };
 
   const tierLabel = (status: LicenseStatus): string => {
-    if (!status.active) return "Free";
+    if (!status.active) return "Бесплатная";
     if (status.tier === "pro") return "Paperweight Pro";
     if (status.tier === "cleanup") return "Cleanup Pass";
     if (status.tier === "lifetime") return "Lifetime Pro";
-    return "Licensed";
+    return "Лицензирована";
   };
 
   const connectionHealthy = !!connection;
@@ -271,7 +271,7 @@ export default function Settings(): JSX.Element {
           email: account.email,
         });
       } else {
-        result = { success: false, error: "Reconnect is not available for this account" };
+        result = { success: false, error: "Переподключение для этого аккаунта недоступно" };
       }
       const error = reconnectError(result);
       if (error) {
@@ -283,7 +283,7 @@ export default function Settings(): JSX.Element {
       setAccount(await window.api.getAccountInfo());
       window.api.startSync();
     } catch (err) {
-      setReconnectFailure(err instanceof Error ? err.message : "Reconnect failed");
+      setReconnectFailure(err instanceof Error ? err.message : "Не удалось переподключиться");
     } finally {
       setReconnectLoading(false);
     }
@@ -295,15 +295,15 @@ export default function Settings(): JSX.Element {
   return (
     <div className="space-y-6 max-w-xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">Настройки</h1>
         <div className="flex items-center gap-1">
           <button
             type="button"
             className="btn btn-ghost btn-sm btn-square"
             title={
               colorTheme === "dim"
-                ? "Switch to light mode"
-                : "Switch to dark mode"
+                ? "Светлая тема"
+                : "Тёмная тема"
             }
             onClick={() => {
               const theme: ColorTheme = colorTheme === "dim" ? "silk" : "dim";
@@ -320,7 +320,7 @@ export default function Settings(): JSX.Element {
           <button
             className="btn btn-ghost btn-sm btn-square"
             onClick={() => navigate("/support")}
-            title="Support"
+            title="Поддержка"
           >
             <HelpCircle className="w-4 h-4" />
           </button>
@@ -330,7 +330,7 @@ export default function Settings(): JSX.Element {
       {/* Section 1: Accounts */}
       <div id="accounts" ref={accountsSectionRef} className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Accounts</h3>
+          <h3 className="font-semibold">Аккаунты</h3>
           <div className="space-y-2">
             {accounts.map((acc) => (
               <div
@@ -350,14 +350,14 @@ export default function Settings(): JSX.Element {
                       </span>
                       {acc.isActive && (
                         <span className="badge badge-xs badge-soft badge-success shrink-0">
-                          Active
+                          Активен
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-base-content/50">
                       {formatProvider(acc.providerType)}
                       {acc.registeredAt
-                        ? ` · Registered ${formatDate(acc.registeredAt)}`
+                        ? ` · Добавлен ${formatDate(acc.registeredAt)}`
                         : ""}
                       {` · ${formatBytes(acc.sizeBytes)}`}
                     </p>
@@ -373,7 +373,7 @@ export default function Settings(): JSX.Element {
                       {switchingEmail === acc.email ? (
                         <span className="loading loading-spinner loading-xs" />
                       ) : (
-                        "Switch"
+                        "Переключить"
                       )}
                     </button>
                   )}
@@ -383,7 +383,7 @@ export default function Settings(): JSX.Element {
                       disabled={actionBusy}
                       onClick={() => setShowServerSettings(true)}
                     >
-                      Configure
+                      Настроить
                     </button>
                   )}
                   <button
@@ -394,7 +394,7 @@ export default function Settings(): JSX.Element {
                       setRemoveAccountEmail(acc.email);
                     }}
                   >
-                    Remove
+                    Удалить
                   </button>
                 </div>
               </div>
@@ -407,11 +407,11 @@ export default function Settings(): JSX.Element {
               onClick={handleAddAccount}
             >
               {needsLicense && <Lock className="w-3.5 h-3.5" />}
-              Add account
+              Добавить аккаунт
             </button>
             {needsLicense && (
               <span className="text-xs text-base-content/50">
-                Requires Pro
+                Требуется Pro
               </span>
             )}
             <button
@@ -419,7 +419,7 @@ export default function Settings(): JSX.Element {
               className="btn btn-link btn-sm px-0"
               onClick={() => navigate("/profile")}
             >
-              Manage your profile
+              Управление профилем
             </button>
           </div>
         </div>
@@ -429,18 +429,22 @@ export default function Settings(): JSX.Element {
       <div id="license" ref={licenseSectionRef} className="card bg-base-200">
         <div className="card-body space-y-4">
           <h3 className="font-semibold">
-            {license.active ? "License" : "Upgrade to Pro"}
+            {license.active ? "Лицензия" : "Перейти на Pro"}
           </h3>
 
           {account && (
             <>
-              {license.active ? (
+              {license.active && !license.key ? (
+                <p className="text-sm text-base-content/60">
+                  Своя сборка: все функции Pro включены, ключ не нужен.
+                </p>
+              ) : license.active ? (
                 <div className="space-y-2">
                   <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
-                    <span className="text-base-content/50">Type</span>
+                    <span className="text-base-content/50">Тип</span>
                     <span>{tierLabel(license)}</span>
 
-                    <span className="text-base-content/50">Key</span>
+                    <span className="text-base-content/50">Ключ</span>
                     <span className="font-mono">
                       {license.key
                         ? `XXXX-XXXX-${license.key.slice(-4)}`
@@ -449,7 +453,7 @@ export default function Settings(): JSX.Element {
 
                     {license.expiresAt && (
                       <>
-                        <span className="text-base-content/50">Expires</span>
+                        <span className="text-base-content/50">Действует до</span>
                         <span>
                           {new Date(license.expiresAt).toLocaleDateString()}
                         </span>
@@ -465,13 +469,13 @@ export default function Settings(): JSX.Element {
                         )
                       }
                     >
-                      Manage
+                      Управление
                     </button>
                     <button
                       className="btn btn-ghost btn-sm"
                       onClick={handleDeactivateLicense}
                     >
-                      Remove
+                      Удалить
                     </button>
                   </div>
                 </div>
@@ -484,7 +488,7 @@ export default function Settings(): JSX.Element {
                     <input
                       type="text"
                       className="input input-bordered input-sm flex-1"
-                      placeholder="License key"
+                      placeholder="Лицензионный ключ"
                       value={licenseKey}
                       onChange={(e) => setLicenseKey(e.target.value)}
                       onKeyDown={(e) =>
@@ -499,7 +503,7 @@ export default function Settings(): JSX.Element {
                       {licenseLoading ? (
                         <span className="loading loading-spinner loading-xs" />
                       ) : (
-                        "Activate"
+                        "Активировать"
                       )}
                     </button>
                   </div>
@@ -512,7 +516,7 @@ export default function Settings(): JSX.Element {
                       window.api.openExternal(`${APP_CONFIG.WEBSITE}/pricing`)
                     }
                   >
-                    View Pro plans
+                    Тарифы Pro
                   </button>
                 </div>
               )}
@@ -524,12 +528,12 @@ export default function Settings(): JSX.Element {
       {/* Section 3: Sync */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Sync</h3>
+          <h3 className="font-semibold">Синхронизация</h3>
 
           {account && (
             <>
               <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-                <span className="text-base-content/50">Connection</span>
+                <span className="text-base-content/50">Подключение</span>
                 <span className="flex items-center gap-2">
                   {formatProvider(account.providerType)}
                   <span
@@ -537,14 +541,14 @@ export default function Settings(): JSX.Element {
                   />
                 </span>
 
-                <span className="text-base-content/50">Last sync</span>
+                <span className="text-base-content/50">Последняя синхронизация</span>
                 <span>{formatDateTime(account.lastSyncAt)}</span>
 
-                <span className="text-base-content/50">Messages synced</span>
+                <span className="text-base-content/50">Синхронизировано писем</span>
                 <span>{account.totalMessages.toLocaleString()}</span>
 
-                <span className="text-base-content/50">Sync period</span>
-                <span>Full history</span>
+                <span className="text-base-content/50">Период</span>
+                <span>Вся история</span>
               </div>
 
               {(account.providerType === "gmail" ||
@@ -558,7 +562,7 @@ export default function Settings(): JSX.Element {
                     {reconnectLoading ? (
                       <span className="loading loading-spinner loading-xs" />
                     ) : (
-                      "Reconnect"
+                      "Переподключить"
                     )}
                   </button>
                 )}
@@ -573,7 +577,7 @@ export default function Settings(): JSX.Element {
       {/* Section 4: App Settings */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">App Settings</h3>
+          <h3 className="font-semibold">Приложение</h3>
           <div className="form-control">
             <label className="label cursor-pointer justify-start gap-3">
               <input
@@ -590,7 +594,7 @@ export default function Settings(): JSX.Element {
                   });
                 }}
               />
-              <span className="text-sm font-medium">Launch at login</span>
+              <span className="text-sm font-medium">Запускать при входе в систему</span>
             </label>
           </div>
           {autoLaunch && (
@@ -606,10 +610,10 @@ export default function Settings(): JSX.Element {
                     window.api.saveSettings({ launchMinimized: minimized });
                   }}
                 />
-                <span className="text-sm font-medium">Open in background</span>
+                <span className="text-sm font-medium">Открывать в фоне</span>
               </label>
               <p className="text-xs text-base-content/50 ml-12">
-                Start hidden when auto-launched at login
+                Запускаться свёрнутым при автозапуске
               </p>
             </div>
           )}
@@ -619,9 +623,9 @@ export default function Settings(): JSX.Element {
       {/* Section 5: AI Agent Access */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">AI Agent access (experimental)</h3>
+          <h3 className="font-semibold">Доступ ИИ-агентов (экспериментально)</h3>
           <p className="text-sm text-base-content/60">
-            MCP access requires Pro. Choose what connected agents can do with Paperweight.
+            Доступ по MCP требует Pro. Выберите, что подключённые агенты могут делать в Paperweight.
           </p>
 
           <div
@@ -633,16 +637,16 @@ export default function Settings(): JSX.Element {
               aria-hidden="true"
             />
             <div className="min-w-0">
-              <p className="font-semibold">Only use with models you trust</p>
+              <p className="font-semibold">Используйте только с моделями, которым доверяете</p>
               <p className="text-sm text-base-content/60">
-                Data might be shared with your model provider. Use a local model
-                (e.g. Ollama) to keep all data on your device.
+                Данные могут передаваться провайдеру модели. Используйте локальную модель
+                (например, Ollama), чтобы все данные оставались на устройстве.
               </p>
             </div>
           </div>
 
           <label className="form-control w-full max-w-sm flex flex-col gap-2">
-            <span className="label-text text-sm font-medium">Access</span>
+            <span className="label-text text-sm font-medium">Доступ</span>
             <select
               className="select select-bordered select-sm"
               value={agentAccess}
@@ -660,28 +664,28 @@ export default function Settings(): JSX.Element {
                 void window.api.saveSettings({ agentAccess: access });
               }}
             >
-              <option value="off">Off</option>
-              <option value="read" disabled={!license.active}>Read only</option>
-              <option value="actions" disabled={!license.active}>Read &amp; write</option>
+              <option value="off">Выключен</option>
+              <option value="read" disabled={!license.active}>Только чтение</option>
+              <option value="actions" disabled={!license.active}>Чтение и запись</option>
             </select>
           </label>
           {agentAccess === "actions" ? (
             <div className="space-y-1 max-w-2xl">
               <p className="text-sm text-base-content/60">
-                Agents can unsubscribe, trash, report spam, and update
-                Paperweight data for the selected mailbox.
+                Агенты могут отписываться, удалять, помечать спам и изменять
+                данные Paperweight для выбранного ящика.
               </p>
               <p className="text-xs text-base-content/50">
-                Sending a privacy request or case follow-up asks for approval in
-                the agent. Recommended to turn on tool-call approvals in your
-                agent. Use at own risk.
+                Отправка запроса о данных или повторного письма требует подтверждения
+                в агенте. Рекомендуем включить подтверждение вызовов инструментов
+                в агенте. Используйте на свой риск.
               </p>
             </div>
           ) : (
             <p className="text-xs text-base-content/50">
               {agentAccess === "off"
-                ? "Agents cannot access Paperweight."
-                : "Agents can read data, but not change anything."}
+                ? "У агентов нет доступа к Paperweight."
+                : "Агенты могут читать данные, но ничего не менять."}
             </p>
           )}
 
@@ -705,26 +709,26 @@ export default function Settings(): JSX.Element {
                         void window.api.saveSettings({ agentMaskPersonalData: true });
                       }}
                     />
-                    <span className="text-sm font-medium">Mask personal data</span>
+                    <span className="text-sm font-medium">Маскировать личные данные</span>
                   </label>
                 </div>
                 {agentMaskPersonalData ? (
                   <>
                     <p className="text-sm text-base-content/60 max-w-2xl">
-                      Paperweight masks known personal data such as your profile,
-                      PII findings, addresses, and matches in message text. This
-                      is best-effort, and undetected details in mail can still be
-                      forwarded to your agent.
+                      Paperweight маскирует известные личные данные: профиль,
+                      найденные ПДн, адреса и совпадения в тексте писем. Это
+                      делается по мере возможности — нераспознанные данные из писем
+                      всё равно могут попасть к агенту.
                     </p>
                     <p className="text-xs text-base-content/50 max-w-2xl">
-                      Recommended when interacting with agents.
+                      Рекомендуется при работе с агентами.
                     </p>
                   </>
                 ) : (
                   <p className="text-xs text-warning max-w-2xl">
-                    Personal data the App can show is visible to the agent,
-                    including profile values and message text. Turn masking on
-                    unless you use a local model you trust.
+                    Агенту видны все личные данные, которые может показать приложение,
+                    включая профиль и текст писем. Включите маскирование, если
+                    не используете доверенную локальную модель.
                   </p>
                 )}
               </div>
@@ -732,9 +736,9 @@ export default function Settings(): JSX.Element {
               <div className="divider my-1" />
 
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold">MCP config</h4>
+                <h4 className="text-sm font-semibold">Конфигурация MCP</h4>
                 <p className="text-sm text-base-content/60">
-                  Add this server to your agent's MCP config, then restart the agent.
+                  Добавьте этот сервер в MCP-конфигурацию агента и перезапустите агента.
                 </p>
                 {mcpSetup?.available && mcpConfig ? (
                   <div className="space-y-2">
@@ -749,12 +753,12 @@ export default function Settings(): JSX.Element {
                         window.setTimeout(() => setMcpConfigCopied(false), 2_000);
                       }}
                     >
-                      {mcpConfigCopied ? "Copied" : "Copy config"}
+                      {mcpConfigCopied ? "Скопировано" : "Копировать конфигурацию"}
                     </button>
                   </div>
                 ) : mcpSetup ? (
                   <p className="text-sm text-error">
-                    This build doesn't include the Paperweight MCP server.
+                    В этой сборке нет MCP-сервера Paperweight.
                   </p>
                 ) : (
                   <span className="loading loading-spinner loading-xs" />
@@ -768,11 +772,11 @@ export default function Settings(): JSX.Element {
       {/* Section 6: Whitelist */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Whitelist</h3>
+          <h3 className="font-semibold">Белый список</h3>
           <p className="text-sm text-base-content/60">
-            Whitelisted domains and addresses are hidden from Mail. Add a domain
-            (e.g. example.com) to whitelist all senders from it, or an address
-            (e.g. user@example.com) to whitelist a single sender.
+            Домены и адреса из белого списка скрыты из «Рассылок». Добавьте домен
+            (например, example.com), чтобы разрешить всех его отправителей, или адрес
+            (например, user@example.com), чтобы разрешить одного отправителя.
           </p>
           {whitelistEntries.length > 0 && (
             <div className="space-y-1">
@@ -786,7 +790,7 @@ export default function Settings(): JSX.Element {
                     className="btn btn-ghost btn-xs"
                     onClick={() => handleRemoveWhitelistEntry(entry.value)}
                   >
-                    Remove
+                    Удалить
                   </button>
                 </div>
               ))}
@@ -796,13 +800,13 @@ export default function Settings(): JSX.Element {
             <input
               type="text"
               className="input input-bordered input-sm flex-1"
-              placeholder="example.com or user@example.com"
+              placeholder="example.com или user@example.com"
               value={newEntry}
               onChange={(e) => setNewEntry(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddEntry()}
             />
             <button className="btn btn-primary btn-sm" onClick={handleAddEntry}>
-              Add
+              Добавить
             </button>
           </div>
         </div>
@@ -811,23 +815,23 @@ export default function Settings(): JSX.Element {
       {/* Section 7: Danger Zone */}
       <div className="card bg-base-200 border border-error/30">
         <div className="card-body space-y-4">
-          <h3 className="font-semibold text-error">Danger Zone</h3>
+          <h3 className="font-semibold text-error">Опасная зона</h3>
           <div>
             <p className="text-sm text-base-content/60">
-              Re-sync email data for {account?.email ?? "this account"}. Your
-              connections, settings, and whitelists are kept.
+              Заново синхронизировать почту для {account?.email ?? "этого аккаунта"}.
+              Подключения, настройки и белые списки сохранятся.
             </p>
             <button
               className="btn btn-error btn-outline btn-sm w-fit mt-2"
               onClick={() => setShowResyncModal(true)}
             >
-              Re-sync Data
+              Пересинхронизировать
             </button>
           </div>
           <div>
             <p className="text-sm text-base-content/60">
-              Delete everything including all accounts, emails, settings,
-              stored credentials, and your license.
+              Удалить всё: аккаунты, письма, настройки, сохранённые
+              учётные данные и лицензию.
             </p>
             <button
               className="btn btn-error btn-sm w-fit mt-2"
@@ -836,7 +840,7 @@ export default function Settings(): JSX.Element {
                 setShowWipeModal(true);
               }}
             >
-              Wipe All Data
+              Стереть все данные
             </button>
           </div>
         </div>
@@ -845,22 +849,22 @@ export default function Settings(): JSX.Element {
       {showAgentActionsModal && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg">Enable Read &amp; write?</h3>
+            <h3 className="font-bold text-lg">Включить чтение и запись?</h3>
             <div className="py-4 space-y-3">
               <p>
-                This allows agents to act on your behalf, such as unsubscribing,
-                deleting, or reporting messages as spam. Sending a privacy request
-                or follow-up will still ask for explicit approval before sending.
-                Recommended to turn on tool-call approvals in your agent.
+                Агенты смогут действовать от вашего имени: отписываться, удалять
+                письма и помечать их как спам. Отправка запроса о данных или
+                повторного письма по-прежнему потребует явного подтверждения.
+                Рекомендуем включить подтверждение вызовов инструментов в агенте.
               </p>
-              <p>Use at own risk.</p>
+              <p>Используйте на свой риск.</p>
             </div>
             <div className="modal-action">
               <button
                 className="btn btn-ghost"
                 onClick={() => setShowAgentActionsModal(false)}
               >
-                Cancel
+                Отмена
               </button>
               <button
                 className="btn btn-primary"
@@ -874,12 +878,12 @@ export default function Settings(): JSX.Element {
                   setShowAgentActionsModal(false);
                 }}
               >
-                Enable Read &amp; write
+                Включить чтение и запись
               </button>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowAgentActionsModal(false)}>close</button>
+            <button onClick={() => setShowAgentActionsModal(false)}>закрыть</button>
           </form>
         </dialog>
       )}
@@ -887,18 +891,18 @@ export default function Settings(): JSX.Element {
       {showAgentUnmaskModal && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg">Turn off personal-data masking?</h3>
+            <h3 className="font-bold text-lg">Отключить маскирование личных данных?</h3>
             <p className="py-4">
-              Your agent will receive any personal data that you discuss,
-              including profile values and message text. Use only with a
-              (local) model you trust or leave this turned on.
+              Агент будет получать все обсуждаемые личные данные, включая
+              профиль и текст писем. Используйте только с доверенной (локальной)
+              моделью или оставьте маскирование включённым.
             </p>
             <div className="modal-action">
               <button
                 className="btn btn-ghost"
                 onClick={() => setShowAgentUnmaskModal(false)}
               >
-                Keep masking
+                Оставить маскирование
               </button>
               <button
                 className="btn btn-error"
@@ -911,12 +915,12 @@ export default function Settings(): JSX.Element {
                   setShowAgentUnmaskModal(false);
                 }}
               >
-                Turn off masking
+                Отключить маскирование
               </button>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowAgentUnmaskModal(false)}>close</button>
+            <button onClick={() => setShowAgentUnmaskModal(false)}>закрыть</button>
           </form>
         </dialog>
       )}
@@ -925,7 +929,7 @@ export default function Settings(): JSX.Element {
       {showAddAccountModal && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Add account</h3>
+            <h3 className="font-bold text-lg mb-4">Добавить аккаунт</h3>
 
             {addAccountView === "provider" && (
               <>
@@ -947,7 +951,7 @@ export default function Settings(): JSX.Element {
                     className="btn btn-ghost"
                     onClick={() => setShowAddAccountModal(false)}
                   >
-                    Cancel
+                    Отмена
                   </button>
                 </div>
               </>
@@ -995,7 +999,7 @@ export default function Settings(): JSX.Element {
           {addAccountView === "provider" && (
             <form method="dialog" className="modal-backdrop">
               <button onClick={() => setShowAddAccountModal(false)}>
-                close
+                закрыть
               </button>
             </form>
           )}
@@ -1006,27 +1010,27 @@ export default function Settings(): JSX.Element {
       {showResyncModal && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg">Re-sync data?</h3>
+            <h3 className="font-bold text-lg">Пересинхронизировать данные?</h3>
             <p className="py-4">
-              All synced emails and sender data for{" "}
-              <span className="font-medium">{account?.email}</span> will be
-              deleted. Paperweight will re-sync from scratch. Your connections,
-              settings, and whitelists are kept.
+              Все синхронизированные письма и данные об отправителях для{" "}
+              <span className="font-medium">{account?.email}</span> будут
+              удалены, и Paperweight синхронизирует всё заново. Подключения,
+              настройки и белые списки сохранятся.
             </p>
             <div className="modal-action">
               <button
                 className="btn btn-ghost"
                 onClick={() => setShowResyncModal(false)}
               >
-                Cancel
+                Отмена
               </button>
               <button className="btn btn-warning" onClick={handleResync}>
-                Re-sync
+                Пересинхронизировать
               </button>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowResyncModal(false)}>close</button>
+            <button onClick={() => setShowResyncModal(false)}>закрыть</button>
           </form>
         </dialog>
       )}
@@ -1051,13 +1055,13 @@ export default function Settings(): JSX.Element {
       {removeAccountEmail && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg">Remove account?</h3>
+            <h3 className="font-bold text-lg">Удалить аккаунт?</h3>
             <p className="py-4">
-              This will permanently delete the account data for{" "}
-              <span className="font-medium">{removeAccountEmail}</span>, including
-              synced emails and settings.
+              Данные аккаунта{" "}
+              <span className="font-medium">{removeAccountEmail}</span> будут удалены
+              безвозвратно, включая синхронизированные письма и настройки.
             </p>
-            <p className="py-4">Your license is not affected.</p>
+            <p className="py-4">Лицензия при этом не затрагивается.</p>
             {deletionError && (
               <p className="text-sm text-error">{deletionError}</p>
             )}
@@ -1070,7 +1074,7 @@ export default function Settings(): JSX.Element {
                   setRemoveAccountEmail(null);
                 }}
               >
-                Cancel
+                Отмена
               </button>
               <button
                 className="btn btn-error"
@@ -1085,7 +1089,7 @@ export default function Settings(): JSX.Element {
                     setRemoveAccountEmail(null);
                   } catch {
                     setDeletionError(
-                      "Paperweight could not delete this account's local data. Close other programs using these files and try again.",
+                      "Paperweight не удалось удалить локальные данные аккаунта. Закройте программы, использующие эти файлы, и попробуйте снова.",
                     );
                   } finally {
                     setRemoveInProgress(false);
@@ -1095,7 +1099,7 @@ export default function Settings(): JSX.Element {
                 {removeInProgress ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  "Remove"
+                  "Удалить"
                 )}
               </button>
             </div>
@@ -1108,7 +1112,7 @@ export default function Settings(): JSX.Element {
                 setRemoveAccountEmail(null);
               }}
             >
-              close
+              закрыть
             </button>
           </form>
         </dialog>
@@ -1118,11 +1122,11 @@ export default function Settings(): JSX.Element {
       {showWipeModal && (
         <dialog className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg">Wipe all data?</h3>
+            <h3 className="font-bold text-lg">Стереть все данные?</h3>
             <p className="py-4">
-              This will permanently delete <strong>all accounts</strong>,
-              synced emails, credentials, settings, and your license. This
-              action cannot be undone.
+              Будут безвозвратно удалены <strong>все аккаунты</strong>,
+              синхронизированные письма, учётные данные, настройки и лицензия.
+              Это действие нельзя отменить.
             </p>
             {deletionError && (
               <p className="text-sm text-error">{deletionError}</p>
@@ -1136,7 +1140,7 @@ export default function Settings(): JSX.Element {
                   setShowWipeModal(false);
                 }}
               >
-                Cancel
+                Отмена
               </button>
               <button
                 className="btn btn-error"
@@ -1146,7 +1150,7 @@ export default function Settings(): JSX.Element {
                 {wipeInProgress ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  "Wipe everything"
+                  "Стереть всё"
                 )}
               </button>
             </div>
@@ -1159,7 +1163,7 @@ export default function Settings(): JSX.Element {
                 setShowWipeModal(false);
               }}
             >
-              close
+              закрыть
             </button>
           </form>
         </dialog>

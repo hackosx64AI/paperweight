@@ -18,27 +18,27 @@ import { useAccounts } from "../hooks/useAccounts";
 const navItems = [
   {
     to: "/dashboard",
-    label: "Dashboard",
+    label: "Обзор",
     icon: <Inbox className="w-5 h-5" aria-hidden="true" />,
   },
   {
     to: "/mail",
-    label: "Mailing lists",
+    label: "Рассылки",
     icon: <Mail className="w-5 h-5" aria-hidden="true" />,
   },
   {
     to: "/accounts",
-    label: "Accounts",
+    label: "Аккаунты",
     icon: <Contact className="w-5 h-5" aria-hidden="true" />,
   },
   {
     to: "/data",
-    label: "Personal Data",
+    label: "Личные данные",
     icon: <IdCard className="w-5 h-5" aria-hidden="true" />,
   },
   {
     to: "/cases",
-    label: "Cases",
+    label: "Обращения",
     icon: <FolderClosed className="w-5 h-5" aria-hidden="true" />,
   },
 ];
@@ -182,7 +182,7 @@ export default function AppShell(): JSX.Element {
                     onClick={() => setDropdownOpen(false)}
                     className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-base-300 transition-colors text-sm text-base-content/60"
                   >
-                    Manage accounts
+                    Управление аккаунтами
                     <span aria-hidden="true">›</span>
                   </NavLink>
                 </div>
@@ -199,10 +199,10 @@ export default function AppShell(): JSX.Element {
               `flex items-center gap-3 rounded-lg px-3 py-2 transition-colors justify-center xl:justify-start tooltip tooltip-right xl:before:hidden xl:after:hidden ${isActive ? "bg-neutral text-neutral-content" : "hover:bg-base-300"
               }`
             }
-            data-tip="User Profile"
+            data-tip="Профиль"
           >
             <UserRound className="w-5 h-5" aria-hidden="true" />
-            <span className="hidden xl:inline text-sm font-medium">User Profile</span>
+            <span className="hidden xl:inline text-sm font-medium">Профиль</span>
           </NavLink>
           <NavLink
             to="/settings"
@@ -210,10 +210,10 @@ export default function AppShell(): JSX.Element {
               `flex items-center gap-3 rounded-lg px-3 py-2 transition-colors justify-center xl:justify-start tooltip tooltip-right xl:before:hidden xl:after:hidden ${isActive ? "bg-neutral text-neutral-content" : "hover:bg-base-300"
               }`
             }
-            data-tip="Settings"
+            data-tip="Настройки"
           >
             <Settings className="w-5 h-5" aria-hidden="true" />
-            <span className="hidden xl:inline text-sm font-medium">Settings</span>
+            <span className="hidden xl:inline text-sm font-medium">Настройки</span>
           </NavLink>
         </nav>
       </aside>

@@ -14,7 +14,7 @@ describe("account connection intent", () => {
       "other@example.com",
     )).toEqual({
       success: false,
-      error: "This account is already connected. Use Reconnect instead.",
+      error: "Этот аккаунт уже подключён. Используйте «Переподключить».",
     });
   });
 
@@ -31,7 +31,7 @@ describe("account connection intent", () => {
       "existing@example.com",
     )).toEqual({
       success: false,
-      error: "Sign-in returned a different account. Try again with the account you are reconnecting.",
+      error: "Вход выполнен в другой аккаунт. Повторите вход с переподключаемым аккаунтом.",
     });
   });
 
@@ -48,7 +48,7 @@ describe("account connection intent", () => {
       "active@example.com",
     )).toEqual({
       success: false,
-      error: "The account being reconnected is no longer active. Switch to it and try again.",
+      error: "Переподключаемый аккаунт больше не активен. Переключитесь на него и повторите.",
     });
   });
 
@@ -65,7 +65,7 @@ describe("account connection intent", () => {
       "existing@example.com",
     )).toEqual({
       success: false,
-      error: "This account is connected through a different provider.",
+      error: "Этот аккаунт подключён через другого провайдера.",
     });
   });
 
@@ -78,7 +78,7 @@ describe("account connection intent", () => {
       "missing@example.com",
     )).toEqual({
       success: false,
-      error: "This account is no longer connected. Add it again instead.",
+      error: "Этот аккаунт больше не подключён. Добавьте его заново.",
     });
   });
 

@@ -84,7 +84,56 @@ export const NATIONAL_IDS: NationalIdSpec[] = [
     requiresContext: /\b(?:national insurance|nino|ni number)\b/i,
     confidence: "contextual",
   },
+  // Russia. Context keywords are Cyrillic, so they use Unicode lookarounds:
+  // \b is ASCII-only and never fires next to Cyrillic letters.
+  {
+    country: "RU",
+    name: "snils-mod101",
+    // 11 digits, usually grouped 123-456-789 01
+    pattern: /(?<![\d-])\d{3}-?\d{3}-?\d{3}[ -]?\d{2}(?![\d-])/g,
+    validate: snils,
+    requiresContext: /(?<![\p{L}])(?:снилс|страхов(?:ой|ого) номер)(?![\p{L}])/iu,
+  },
+  {
+    country: "RU",
+    name: "inn-person-mod11",
+    // personal INN is 12 digits; the 10-digit INN belongs to companies and is
+    // printed in every footer, so it is deliberately not detected
+    pattern: /(?<!\d)\d{12}(?!\d)/g,
+    validate: innPerson,
+    requiresContext: /(?<![\p{L}])инн(?![\p{L}])/iu,
+  },
+  {
+    country: "RU",
+    name: "passport-format",
+    // series (2+2 digits) and number (6 digits); no checksum exists
+    pattern: /(?<!\d)\d{2}\s?\d{2}\s?(?:№\s?)?\d{6}(?!\d)/g,
+    validate: () => true,
+    requiresContext: /(?<![\p{L}])паспорт(?:а|е|ные|ные данные)?(?![\p{L}])/iu,
+    confidence: "contextual",
+  },
 ];
+
+// СНИЛС: weighted sum of the first 9 digits (weights 9..1). Below 100 the sum
+// is the check number; 100 and 101 give 00; above that, sum mod 101 (100 → 00).
+function snils(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += (digits.charCodeAt(i) - 48) * (9 - i);
+  let check = sum < 100 ? sum : sum % 101;
+  if (check === 100) check = 0;
+  return check === Number(digits.slice(9));
+}
+
+// Personal INN: two control digits, each a weighted sum mod 11 mod 10.
+function innPerson(digits: string): boolean {
+  const control = (weights: number[]): number =>
+    (weights.reduce((sum, weight, i) => sum + weight * (digits.charCodeAt(i) - 48), 0) % 11) % 10;
+  return (
+    control([7, 2, 4, 10, 3, 5, 9, 4, 6, 8]) === digits.charCodeAt(10) - 48
+    && control([3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8]) === digits.charCodeAt(11) - 48
+  );
+}
 
 function elfproef(digits: string): boolean {
   let sum = 0;

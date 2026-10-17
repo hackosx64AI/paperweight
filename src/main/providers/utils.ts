@@ -11,26 +11,26 @@ export function friendlyConnectionError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
 
   if (/self.signed cert/i.test(msg)) {
-    return 'Invalid server certificate. Try toggling "Self-signed cert".';
+    return 'Недействительный сертификат сервера. Попробуйте переключить «Разрешить самоподписанный сертификат».';
   }
   if (/WRONG_VERSION_NUMBER/i.test(msg)) {
-    return 'TLS handshake failed. Try toggling "Implicit TLS".';
+    return 'Ошибка TLS-рукопожатия. Попробуйте переключить «TLS».';
   }
   if (/ECONNREFUSED/i.test(msg)) {
-    return `Connection refused at ${msg.match(/\d+\.\d+\.\d+\.\d+:\d+/)?.[0] ?? "the specified host/port"}. Check the mail server.`;
+    return `Соединение отклонено: ${msg.match(/\d+\.\d+\.\d+\.\d+:\d+/)?.[0] ?? "указанный хост/порт"}. Проверьте почтовый сервер.`;
   }
   if (/ETIMEDOUT|ENOTFOUND/i.test(msg)) {
-    return "Could not reach the mail server. Check the host and port.";
+    return "Не удалось связаться с почтовым сервером. Проверьте хост и порт.";
   }
   if (/authenticate|login|credentials|invalid|Command failed/i.test(msg)) {
-    return "Authentication failed. Check your username and password.";
+    return "Ошибка аутентификации. Проверьте логин и пароль.";
   }
   if (
     /Failed to refresh access token|invalid_grant|token.*expired|token.*revoked/i.test(
       msg,
     )
   ) {
-    return "Authorization expired. Reconnect your account to continue syncing.";
+    return "Авторизация истекла. Переподключите аккаунт, чтобы продолжить синхронизацию.";
   }
 
   return msg;
@@ -72,10 +72,10 @@ export function runLoopbackAuth(
       res.end(
         code
           ? `<!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Paperweight — Connected</title>
+  <title>Paperweight — подключено</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -109,15 +109,15 @@ export function runLoopbackAuth(
 </head>
 <body>
   <div class="stone">🗿</div>
-  <h2>You're in.</h2>
-  <p>You can close this tab.</p>
+  <h2>Готово, вход выполнен.</h2>
+  <p>Эту вкладку можно закрыть.</p>
 </body>
 </html>`
           : `<!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Paperweight — Authorization Failed</title>
+  <title>Paperweight — ошибка авторизации</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -139,8 +139,8 @@ export function runLoopbackAuth(
 </head>
 <body>
   <div class="stone">🗿</div>
-  <h2>Authorization failed.</h2>
-  <p>${escapeHtml(errorDescription || error || "Unknown error")}</p>
+  <h2>Авторизация не удалась.</h2>
+  <p>${escapeHtml(errorDescription || error || "Неизвестная ошибка")}</p>
 </body>
 </html>`
       );
@@ -150,7 +150,7 @@ export function runLoopbackAuth(
       if (code) {
         resolve({ code, redirectUri });
       } else {
-        reject(new Error(error || "Authorization was denied or failed"));
+        reject(new Error(error || "Авторизация отклонена или не удалась"));
       }
     });
 
@@ -177,7 +177,7 @@ export function runLoopbackAuth(
 
     setTimeout(() => {
       server.close();
-      reject(new Error("Authorization timed out"));
+      reject(new Error("Истекло время ожидания авторизации"));
     }, 5 * 60 * 1000);
   });
 }

@@ -7,13 +7,13 @@ describe("Settings reconnect result", () => {
     expect(
       reconnectError({
         success: false,
-        error: "Sign-in returned a different account.",
+        error: "Вход выполнен в другой аккаунт.",
       }),
-    ).toBe("Sign-in returned a different account.");
+    ).toBe("Вход выполнен в другой аккаунт.");
   });
 
   it("returns a fallback when a rejected reconnect has no error", () => {
-    expect(reconnectError({ success: false })).toBe("Reconnect failed");
+    expect(reconnectError({ success: false })).toBe("Не удалось переподключиться");
   });
 
   it("returns no error after a successful reconnect", () => {

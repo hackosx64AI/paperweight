@@ -126,7 +126,7 @@ export default function App(): JSX.Element {
         {paperweightEgg && (
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[70]">
             <div role="alert" className="alert alert-info shadow-lg">
-              <span>Immovable. Like a paperweight.</span>
+              <span>Непоколебим. Как пресс-папье.</span>
             </div>
           </div>
         )}

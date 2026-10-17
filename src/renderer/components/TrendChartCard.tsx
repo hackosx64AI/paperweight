@@ -27,8 +27,8 @@ export default function TrendChart({
 
   const badgeText =
     t.direction === "flat"
-      ? "— same"
-      : `${t.direction === "down" ? "↓" : "↑"} ${t.pct}% vs prior`;
+      ? "— без изменений"
+      : `${t.direction === "down" ? "↓" : "↑"} ${t.pct}% к прошлому периоду`;
 
   const badgeClass = (() => {
     if (t.direction === "flat") return "badge-ghost";
@@ -73,7 +73,7 @@ export default function TrendChart({
               />
               <XAxis
                 dataKey="label"
-                tickFormatter={(label) => formatUtcStrictDate(label, "MMM D")}
+                tickFormatter={(label) => formatUtcStrictDate(label, "D MMM")}
                 interval="preserveStartEnd"
                 minTickGap={30}
                 tickMargin={12}

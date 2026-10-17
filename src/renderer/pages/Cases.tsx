@@ -5,6 +5,7 @@ import type { CaseSort, CaseStatusFilter } from "@shared/case-query";
 import type { GdprCaseSummary } from "@shared/types";
 import { CaseListRow } from "../components/CaseListRow";
 import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { plural } from "@shared/formatting";
 
 function PagerControls({
   page,
@@ -39,17 +40,17 @@ function PagerControls({
 }
 
 const SORT_OPTIONS: Array<{ value: CaseSort; label: string }> = [
-  { value: "opened_desc", label: "Latest" },
-  { value: "opened_asc", label: "Oldest" },
-  { value: "name", label: "Name" },
+  { value: "opened_desc", label: "Сначала новые" },
+  { value: "opened_asc", label: "Сначала старые" },
+  { value: "name", label: "По названию" },
 ];
 
 type CaseFilter = Exclude<CaseStatusFilter, "">;
 
 const STATUS_BADGES: Array<{ value: CaseFilter; label: string }> = [
-  { value: "active", label: "Active" },
-  { value: "needs_attention", label: "Needs attention" },
-  { value: "closed", label: "Closed" },
+  { value: "active", label: "Активные" },
+  { value: "needs_attention", label: "Требуют внимания" },
+  { value: "closed", label: "Закрытые" },
 ];
 
 const limit = 20;
@@ -163,16 +164,16 @@ export default function Cases(): JSX.Element {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Cases</h1>
+        <h1 className="text-2xl font-bold">Обращения</h1>
         <p className="text-sm text-base-content/50 mt-1">
-          Data requests you sent from Paperweight. Start a new case from a company&apos;s detail page.
+          Запросы о данных, отправленные из Paperweight. Новое обращение создаётся на странице компании.
         </p>
       </div>
 
       {cases.length === 0 ? (
         <div className="card bg-base-200">
           <div className="card-body text-center text-sm text-base-content/60">
-            <p>No cases yet. Send a data request from a company&apos;s detail page to start tracking.</p>
+            <p>Обращений пока нет. Отправьте запрос о данных со страницы компании, чтобы начать отслеживание.</p>
           </div>
         </div>
       ) : (
@@ -180,19 +181,19 @@ export default function Cases(): JSX.Element {
           <div className="flex items-center gap-3">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Поиск..."
               className="input input-sm input-bordered w-48"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
 
             <span className="text-sm text-base-content/60 shrink-0">
-              {total} {total !== 1 ? "cases" : "case"}
+              {total} {plural(total, "обращение", "обращения", "обращений")}
             </span>
 
             {hasAnyFilter && (
               <button className="badge badge-sm badge-ghost cursor-pointer" onClick={clearAll}>
-                clear all
+                сбросить всё
               </button>
             )}
 
@@ -239,7 +240,7 @@ export default function Cases(): JSX.Element {
           {pageItems.length === 0 ? (
             <div className="card bg-base-200">
               <div className="card-body text-center text-sm text-base-content/60">
-                <p>No cases match your search or filters.</p>
+                <p>Нет обращений, подходящих под поиск или фильтры.</p>
               </div>
             </div>
           ) : (

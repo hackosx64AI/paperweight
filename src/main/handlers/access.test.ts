@@ -65,7 +65,7 @@ it("rejects a mailbox write whose originating mailbox changed before it finished
   const sending = mockHandlers.get(IPC.sendEmail)?.({});
   mockMailbox = "second@example.test";
   finish?.();
-  await expect(sending).rejects.toThrow("no longer matches the current mailbox");
+  await expect(sending).rejects.toThrow("больше не относится к текущему почтовому ящику");
 });
 
 it("treats account connection as a mailbox transition, not a failed write", async () => {

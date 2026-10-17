@@ -9,6 +9,11 @@ import type { Finding } from "../types";
 
 const PHONE_VOCAB =
   /\b(?:tel|telefoon(?:nummer)?|phone|telephone|mobile|mobiel|mob|handy|kontakt|contact|call|bel|whatsapp)\b[^]{0,40}$/i;
+// Cyrillic vocabulary needs Unicode lookarounds (\b is ASCII-only).
+const PHONE_VOCAB_RU =
+  /(?<![\p{L}])(?:тел|телефон|моб|мобильный|звоните|позвоните|контакт(?:ы|ный)?|горячая линия|whatsapp|telegram)(?![\p{L}])[^]{0,40}$/iu;
+// Russia/Kazakhstan write national numbers with trunk prefix 8: 8 (999) 123-45-67.
+const TRUNK_8_REGIONS = new Set(["RU", "KZ"]);
 
 export function detectPhones(text: string, region?: string): Finding[] {
   const defaultCountry =
@@ -22,8 +27,13 @@ export function detectPhones(text: string, region?: string): Finding[] {
     // wave-1 regions) or phone vocabulary nearby. Kills short service codes
     // (legacy service codes like "118 xxx" still validate) and digit runs in amounts/references.
     if (!international) {
-      const vocab = PHONE_VOCAB.test(text.slice(Math.max(0, m.startsAt - 45), m.startsAt));
-      if (!raw.replace(/\D/g, "").startsWith("0") && !vocab) continue;
+      const before = text.slice(Math.max(0, m.startsAt - 45), m.startsAt);
+      const vocab = PHONE_VOCAB.test(before) || PHONE_VOCAB_RU.test(before);
+      const digits = raw.replace(/\D/g, "");
+      const trunk =
+        digits.startsWith("0")
+        || (!!defaultCountry && TRUNK_8_REGIONS.has(defaultCountry) && digits.startsWith("8"));
+      if (!trunk && !vocab) continue;
       if (!/[\s\-().\/]/.test(raw) && !vocab) continue;
     }
     const finding: Finding = {
@@ -45,7 +55,9 @@ export function detectPhones(text: string, region?: string): Finding[] {
 // differs from its ISO country code). Used by analyzeMessage when the caller
 // passes no locale.
 export function regionFromDomain(domain?: string): string | undefined {
-  const tld = domain?.split(".").pop();
+  const tld = domain?.split(".").pop()?.toLowerCase();
+  // .рф (punycode xn--p1ai) and the legacy .su zone are Russian.
+  if (tld === "xn--p1ai" || tld === "рф" || tld === "su") return "RU";
   if (!tld || tld.length !== 2) return undefined;
   const region = tld.toUpperCase();
   return region === "UK" ? "GB" : region;

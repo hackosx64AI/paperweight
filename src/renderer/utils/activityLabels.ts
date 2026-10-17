@@ -1,16 +1,16 @@
 import type { ActivityEntry, GdprCaseAction, GdprCaseOutcome, GdprRequestType } from "@shared/types";
 
 export const ACTION_LABELS: Record<ActivityEntry["actionType"], string> = {
-  unsubscribed: "Unsubscribed",
-  trashed: "Moved to trash",
-  spam_reported: "Reported spam",
-  gdpr_request_sent: "GDPR request sent",
-  reminder_sent: "Reminder sent",
-  followup_sent: "Follow-up sent",
-  reply_received: "Reply received",
-  case_message_linked: "Added to case",
-  escalated: "Escalated to authority",
-  case_closed: "Case closed",
+  unsubscribed: "Отписка",
+  trashed: "Перемещено в корзину",
+  spam_reported: "Отмечено как спам",
+  gdpr_request_sent: "GDPR-запрос отправлен",
+  reminder_sent: "Напоминание отправлено",
+  followup_sent: "Повторный запрос отправлен",
+  reply_received: "Получен ответ",
+  case_message_linked: "Добавлено в обращение",
+  escalated: "Передано в надзорный орган",
+  case_closed: "Обращение закрыто",
 };
 
 export const ACTION_COLORS: Record<ActivityEntry["actionType"], string> = {
@@ -27,9 +27,9 @@ export const ACTION_COLORS: Record<ActivityEntry["actionType"], string> = {
 };
 
 export const CASE_ACTION_LABELS: Record<GdprCaseAction, string> = {
-  reminder: "Reminder",
-  followup: "Follow-up",
-  escalate: "Escalation",
+  reminder: "Напоминание",
+  followup: "Повторный запрос",
+  escalate: "Жалоба",
 };
 
 export const CASE_ACTION_BADGES: Record<GdprCaseAction, string> = {
@@ -39,8 +39,8 @@ export const CASE_ACTION_BADGES: Record<GdprCaseAction, string> = {
 };
 
 export const REQUEST_TYPE_LABELS: Record<GdprRequestType, string> = {
-  access: "Data access",
-  deletion: "Data deletion",
+  access: "Доступ к данным",
+  deletion: "Удаление данных",
 };
 
 /** Semantic classes — see global.css for contrast-safe colors. */
@@ -52,21 +52,21 @@ export const REQUEST_TYPE_BADGES: Record<GdprRequestType, string> = {
 export const CASE_CLOSED_BADGE = "badge-soft";
 
 export const CASE_OUTCOME_LABELS: Record<GdprCaseOutcome, string> = {
-  resolved: "Resolved",
-  escalated: "Escalated",
+  resolved: "Решено",
+  escalated: "Передано регулятору",
 };
 
 export function gdprRequestLabel(requestType: GdprRequestType): string {
-  return requestType === "access" ? "Data access request" : "Data deletion request";
+  return requestType === "access" ? "Запрос на доступ к данным" : "Запрос на удаление данных";
 }
 
 function gdprRequestSentLabel(requestType: GdprRequestType): string {
-  return requestType === "access" ? "Data access request sent" : "Data deletion request sent";
+  return requestType === "access" ? "Запрос на доступ к данным отправлен" : "Запрос на удаление данных отправлен";
 }
 
 function caseClosedLabel(outcome?: GdprCaseOutcome): string {
-  if (!outcome) return "Case closed";
-  return `Case closed — ${CASE_OUTCOME_LABELS[outcome]}`;
+  if (!outcome) return "Обращение закрыто";
+  return `Обращение закрыто — ${CASE_OUTCOME_LABELS[outcome]}`;
 }
 
 /** Single source of truth for how an activity/case event is labelled. */

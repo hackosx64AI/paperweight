@@ -18,21 +18,21 @@ import {
 const slides = [
   {
     icon: <Search className="w-10 h-10" />,
-    title: "Analyse your inbox",
+    title: "Анализ почты",
     description:
-      "Paperweight scans your emails and organises them into two views: Mailing Lists (newsletters and subscriptions) and Accounts (every company that has your data). Start with Mailing Lists. That's where most people find the most to clean up.",
+      "Paperweight сканирует ваши письма и раскладывает их на два раздела: «Рассылки» (новостные письма и подписки) и «Аккаунты» (все компании, у которых есть ваши данные). Начните с рассылок — там обычно больше всего мусора.",
   },
   {
     icon: <Trash2 className="w-10 h-10" />,
-    title: "Clear the clutter",
+    title: "Уберите лишнее",
     description:
-      "Review your mailing lists by volume. Pro lets you unsubscribe, trash emails, and report spam. For senders that support one-click unsubscribe, Paperweight handles it automatically. Others will open the sender's unsubscribe page for you.",
+      "Просматривайте рассылки по объёму. В Pro можно отписываться, удалять письма и отмечать спам. Если отправитель поддерживает отписку в один клик, Paperweight сделает это автоматически; для остальных откроется страница отписки отправителя.",
   },
   {
     icon: <Globe className="w-10 h-10" />,
-    title: "Manage your footprint",
+    title: "Управляйте цифровым следом",
     description:
-      "The Accounts tab shows every company holding your data. For ones you no longer use, Pro lets you send a GDPR deletion request directly from Paperweight. You can also copy the request and send it yourself for free. We pre-fill it with your account details.",
+      "Раздел «Аккаунты» показывает все компании, у которых хранятся ваши данные. Тем, чьими услугами вы больше не пользуетесь, в Pro можно отправить запрос на удаление по GDPR прямо из Paperweight. Бесплатно можно скопировать запрос и отправить его самостоятельно — данные аккаунта мы подставим.",
   },
 ];
 
@@ -110,16 +110,16 @@ export default function Onboarding(): JSX.Element {
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold">Get Started</h2>
+              <h2 className="text-2xl font-bold">Начало работы</h2>
               <p className="text-base-content/60 text-sm mt-1">
-                Connect your email account
+                Подключите почтовый аккаунт
               </p>
             </div>
             <button
               className="btn btn-ghost btn-sm btn-square shrink-0"
               onClick={() => setShowHelpModal(true)}
-              title="Help & device info"
-              aria-label="Help & device info"
+              title="Помощь и сведения об устройстве"
+              aria-label="Помощь и сведения об устройстве"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -181,7 +181,7 @@ export default function Onboarding(): JSX.Element {
       {showHelpModal && (
         <dialog className="modal modal-open">
           <div className="modal-box max-w-md">
-            <h3 className="font-bold text-lg">Help</h3>
+            <h3 className="font-bold text-lg">Помощь</h3>
             <div className="space-y-6 py-4">
               <DeviceInfoCard info={supportInfo} variant="plain" />
               <HelpSection variant="plain" />
@@ -191,12 +191,12 @@ export default function Onboarding(): JSX.Element {
                 className="btn btn-primary"
                 onClick={() => setShowHelpModal(false)}
               >
-                Close
+                Закрыть
               </button>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowHelpModal(false)}>close</button>
+            <button onClick={() => setShowHelpModal(false)}>закрыть</button>
           </form>
         </dialog>
       )}
