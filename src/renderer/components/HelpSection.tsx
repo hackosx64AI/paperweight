@@ -12,7 +12,7 @@ export default function HelpSection({
         className="link link-primary w-fit"
         onClick={() =>
           window.api.openExternal(
-            "https://github.com/wslyvh/paperweight/issues"
+            "https://github.com/hackosx64AI/paperweight/issues"
           )
         }
       >

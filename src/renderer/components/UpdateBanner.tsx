@@ -25,7 +25,7 @@ export default function UpdateBanner({ info, onDismiss }: UpdateBannerProps): JS
             : `У вас v${info.current}. `}
           <button
             className="underline hover:no-underline"
-            onClick={() => window.api.openExternal("https://github.com/wslyvh/paperweight/releases")}
+            onClick={() => window.api.openExternal("https://github.com/hackosx64AI/paperweight/releases")}
           >
             Открыть выпуск
           </button>

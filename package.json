@@ -109,7 +109,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "wslyvh",
+      "owner": "hackosx64AI",
       "repo": "paperweight"
     }
   },
