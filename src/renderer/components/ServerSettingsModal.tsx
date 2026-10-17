@@ -53,10 +53,10 @@ export default function ServerSettingsModal({
       if (result.success) {
         onSaved();
       } else {
-        setError(result.error || "Failed to update server settings");
+        setError(result.error || "Не удалось обновить настройки сервера");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update server settings");
+      setError(err instanceof Error ? err.message : "Не удалось обновить настройки сервера");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function ServerSettingsModal({
   return (
     <dialog className="modal modal-open">
       <div className="modal-box">
-        <h3 className="font-bold text-lg">Server Settings</h3>
+        <h3 className="font-bold text-lg">Настройки сервера</h3>
         <p className="text-xs text-base-content/60 mt-1">{email}</p>
 
         <form onSubmit={handleSubmit} className="space-y-3 pt-4">
@@ -86,7 +86,7 @@ export default function ServerSettingsModal({
               checked={allowSelfSigned}
               onChange={(e) => setAllowSelfSigned(e.target.checked)}
             />
-            <span className="text-xs">Allow self-signed certificate</span>
+            <span className="text-xs">Разрешить самоподписанный сертификат</span>
           </label>
 
           <ServerRow
@@ -101,14 +101,14 @@ export default function ServerSettingsModal({
 
           <label className="form-control">
             <span className="label-text text-xs font-medium text-base-content/60 uppercase tracking-wide mb-1.5">
-              New password
+              Новый пароль
             </span>
             <input
               type="password"
               className="input input-bordered input-sm"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Leave blank to keep current password"
+              placeholder="Оставьте пустым, чтобы сохранить текущий пароль"
               autoComplete="new-password"
             />
           </label>
@@ -126,7 +126,7 @@ export default function ServerSettingsModal({
               disabled={loading}
               onClick={onClose}
             >
-              Cancel
+              Отмена
             </button>
             <button
               type="submit"
@@ -135,17 +135,17 @@ export default function ServerSettingsModal({
             >
               {loading ? (
                 <>
-                  <span className="loading loading-spinner loading-xs" /> Testing...
+                  <span className="loading loading-spinner loading-xs" /> Проверка...
                 </>
               ) : (
-                "Save"
+                "Сохранить"
               )}
             </button>
           </div>
         </form>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button onClick={onClose}>close</button>
+        <button onClick={onClose}>закрыть</button>
       </form>
     </dialog>
   );

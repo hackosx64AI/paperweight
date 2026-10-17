@@ -37,7 +37,7 @@ export default function Support(): JSX.Element {
   };
 
   const formatDateTime = (ts?: number): string => {
-    if (!ts) return "Never";
+    if (!ts) return "Никогда";
     return new Date(ts).toLocaleString(undefined, {
       month: "short",
       day: "numeric",
@@ -49,7 +49,7 @@ export default function Support(): JSX.Element {
   const formatProvider = (type: string): string => {
     if (type === "gmail") return "Gmail (OAuth)";
     if (type === "imap") return "IMAP";
-    return "Not connected";
+    return "Не подключено";
   };
 
   return (
@@ -61,7 +61,7 @@ export default function Support(): JSX.Element {
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-2xl font-bold">Support</h1>
+        <h1 className="text-2xl font-bold">Поддержка</h1>
       </div>
 
       <div className="max-w-xl space-y-6">
@@ -70,19 +70,19 @@ export default function Support(): JSX.Element {
         {/* App Info */}
         <div className="card bg-base-200">
           <div className="card-body space-y-3">
-            <h3 className="font-semibold">App Info</h3>
+            <h3 className="font-semibold">О приложении</h3>
             {info && (
               <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-                <span className="text-base-content/50">Provider</span>
+                <span className="text-base-content/50">Провайдер</span>
                 <span>{formatProvider(info.providerType)}</span>
 
-                <span className="text-base-content/50">License</span>
-                <span>{license.active ? "Active" : "Free"}</span>
+                <span className="text-base-content/50">Лицензия</span>
+                <span>{license.active ? "Активна" : "Бесплатная"}</span>
 
-                <span className="text-base-content/50">Messages synced</span>
+                <span className="text-base-content/50">Синхронизировано писем</span>
                 <span>{info.totalMessages.toLocaleString()}</span>
 
-                <span className="text-base-content/50">Last sync</span>
+                <span className="text-base-content/50">Последняя синхронизация</span>
                 <span>{formatDateTime(info.lastSyncAt)}</span>
               </div>
             )}
@@ -92,12 +92,12 @@ export default function Support(): JSX.Element {
         {/* Storage */}
         <div className="card bg-base-200">
           <div className="card-body space-y-4">
-            <h3 className="font-semibold">Storage</h3>
+            <h3 className="font-semibold">Хранилище</h3>
             {storage && (
               <>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">Account data</span>
+                    <span className="font-medium">Данные аккаунтов</span>
                     <span>{formatBytes(storage.accountsTotalBytes)}</span>
                   </div>
                   {storage.accounts.length > 0 && (
@@ -133,32 +133,32 @@ export default function Support(): JSX.Element {
                 <div className="border-t border-base-300" />
 
                 <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-                  <span className="text-base-content/50">Caches</span>
+                  <span className="text-base-content/50">Кэш</span>
                   <span className="text-right">
                     {formatBytes(storage.cacheBytes)}
                   </span>
 
-                  <span className="text-base-content/50">Logs</span>
+                  <span className="text-base-content/50">Логи</span>
                   <span className="text-right">
                     {formatBytes(storage.logsBytes)}
                   </span>
 
-                  <span className="text-base-content/50">App data</span>
+                  <span className="text-base-content/50">Данные приложения</span>
                   <span className="text-right">
                     {formatBytes(storage.appDataBytes)}
                   </span>
 
-                  <span className="text-base-content/50">App resources</span>
+                  <span className="text-base-content/50">Ресурсы приложения</span>
                   <span className="text-right">
                     {formatBytes(storage.resourcesBytes)}
                   </span>
 
-                  <span className="text-base-content/50">Runtime</span>
+                  <span className="text-base-content/50">Среда выполнения</span>
                   <span className="text-right">
                     {formatBytes(storage.runtimeBytes)}
                   </span>
 
-                  <span className="font-medium">Total</span>
+                  <span className="font-medium">Всего</span>
                   <span className="text-right font-medium">
                     {formatBytes(storage.totalBytes)}
                   </span>
@@ -175,18 +175,18 @@ export default function Support(): JSX.Element {
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Logs</h3>
+            <h3 className="font-semibold">Логи</h3>
             <div className="flex gap-2">
               <button
                 className="btn btn-ghost btn-xs gap-1"
                 onClick={refreshLogs}
               >
                 <RefreshCw className="w-3 h-3" />
-                Refresh
+                Обновить
               </button>
               <button className="btn btn-ghost btn-xs gap-1" onClick={copyLogs}>
                 <Copy className="w-3 h-3" />
-                {copied ? "Copied" : "Copy"}
+                {copied ? "Скопировано" : "Копировать"}
               </button>
             </div>
           </div>

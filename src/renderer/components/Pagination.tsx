@@ -17,17 +17,17 @@ export default function Pagination({
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
         >
-          Previous
+          Назад
         </button>
         <button className="join-item btn btn-sm btn-disabled">
-          Page {page} of {totalPages}
+          Стр. {page} из {totalPages}
         </button>
         <button
           className="join-item btn btn-sm"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >
-          Next
+          Далее
         </button>
       </div>
     </div>

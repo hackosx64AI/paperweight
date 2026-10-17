@@ -210,13 +210,13 @@ export function registerAccountHandlers(): void {
           // The fixed error below is authoritative and carries no personal path.
         }
       }
-      throw new Error("Could not delete this account's local data. Try again.");
+      throw new Error("Не удалось удалить локальные данные аккаунта. Попробуйте снова.");
     }
 
     try {
       removeAccountEntry(email); // also updates activeAccount in global.db
     } catch {
-      throw new Error("Could not update the account registry. Try again.");
+      throw new Error("Не удалось обновить список аккаунтов. Попробуйте снова.");
     }
 
     if (isActive) {

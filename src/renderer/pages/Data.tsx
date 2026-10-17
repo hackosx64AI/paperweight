@@ -19,12 +19,13 @@ import {
 import FilterGroup from "../components/FilterGroup";
 import PiiValueList from "../components/PiiValueList";
 import { usePiiValueActions } from "../hooks/usePiiValueActions";
+import { plural } from "@shared/formatting";
 
 const SORT_OPTIONS: Array<{ value: PiiSort; label: string }> = [
-  { value: "evidence", label: "Evidence" },
-  { value: "last_seen", label: "Latest" },
-  { value: "last_seen_asc", label: "Oldest" },
-  { value: "type", label: "Type" },
+  { value: "evidence", label: "По доказательности" },
+  { value: "last_seen", label: "Сначала новые" },
+  { value: "last_seen_asc", label: "Сначала старые" },
+  { value: "type", label: "По типу" },
 ];
 
 const DEFAULT_SORT = "evidence";
@@ -149,11 +150,11 @@ export default function Data(): JSX.Element {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Personal Data</h1>
+        <h1 className="text-2xl font-bold">Личные данные</h1>
         <p className="text-sm text-base-content/50 mt-1">
-          Personal data found in your emails. This may be incomplete (attachments and
-          sent mail aren&apos;t included) and finding a value doesn&apos;t mean a
-          company still stores it.
+          Личные данные, найденные в ваших письмах. Список может быть неполным (вложения
+          и отправленные письма не учитываются), а находка не означает, что компания
+          до сих пор хранит эти данные.
         </p>
       </div>
 
@@ -163,8 +164,8 @@ export default function Data(): JSX.Element {
         <div className="card bg-base-200">
           <div className="card-body text-center text-sm text-base-content/60">
             <p>
-              No personal data found yet. Paperweight only scans mail it has already
-              synced, so sync to see more.
+              Личные данные пока не найдены. Paperweight сканирует только уже
+              синхронизированную почту — синхронизируйте, чтобы увидеть больше.
             </p>
           </div>
         </div>
@@ -174,19 +175,19 @@ export default function Data(): JSX.Element {
           <div className="flex items-center gap-3">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Поиск..."
               className="input input-sm input-bordered w-48"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
 
             <span className="text-sm text-base-content/60 shrink-0">
-              {total} {total !== 1 ? "values" : "value"}
+              {total} {plural(total, "значение", "значения", "значений")}
             </span>
 
             {hasAnyFilter && (
               <button className="badge badge-sm badge-ghost cursor-pointer" onClick={clearAll}>
-                clear all
+                сбросить всё
               </button>
             )}
 
@@ -240,7 +241,7 @@ export default function Data(): JSX.Element {
               {showFilters && (
                 <div className="absolute right-0 top-full z-20 bg-base-200 rounded-xl shadow-lg mt-1 p-4 min-w-64 space-y-3">
                   <FilterGroup
-                    label="Data type"
+                    label="Тип данных"
                     options={PII_TYPES}
                     labels={PII_TYPES.map(t => PII_LABELS[t])}
                     value={typeFilter}
@@ -257,21 +258,21 @@ export default function Data(): JSX.Element {
               className={`badge badge-sm cursor-pointer gap-1 ${
                 filter === "exact" ? "badge-accent" : "badge-soft badge-accent"
               }`}
-              title="Values confirmed to be yours"
+              title="Значения, подтверждённые как ваши"
               onClick={() => selectFilter("exact")}
             >
               <BadgeCheck className="w-3 h-3" />
-              Match
+              Совпадения
             </button>
 
             <button
               className={`badge badge-sm cursor-pointer ${
                 filter === "unclassified" ? "badge-accent" : "badge-soft badge-accent"
               }`}
-              title="Values not yet marked mine or not mine"
+              title="Значения, ещё не отмеченные как «моё» или «не моё»"
               onClick={() => selectFilter("unclassified")}
             >
-              Unclassified
+              Не разобрано
             </button>
 
             <div className="w-px h-3 bg-base-content/20" />
@@ -293,16 +294,16 @@ export default function Data(): JSX.Element {
               className={`badge badge-sm cursor-pointer ${
                 showingSuppressed ? "badge-accent" : "badge-soft badge-accent"
               }`}
-              title="Values you marked as not yours"
+              title="Значения, которые вы отметили как не свои"
               onClick={() => selectFilter("suppressed")}
             >
-              Not mine
+              Не моё
             </button>
 
             <button
               className="btn btn-sm btn-ghost btn-circle ml-auto"
-              title={showValues ? "Hide values" : "Show values"}
-              aria-label={showValues ? "Hide values" : "Show values"}
+              title={showValues ? "Скрыть значения" : "Показать значения"}
+              aria-label={showValues ? "Скрыть значения" : "Показать значения"}
               disabled={busy}
               onClick={toggleReveal}
             >
@@ -319,8 +320,8 @@ export default function Data(): JSX.Element {
               <div className="card-body text-center text-sm text-base-content/60">
                 <p>
                   {showingSuppressed
-                    ? "You haven't marked anything as not yours."
-                    : "No values match your search or filters."}
+                    ? "Вы ещё ничего не отметили как «не моё»."
+                    : "Нет значений, подходящих под поиск или фильтры."}
                 </p>
               </div>
             </div>

@@ -24,7 +24,7 @@ let pendingMailboxWrites = 0;
 let pendingAccountChanges = 0;
 
 const ACTION_BUSY = "Wait for the current action to finish before continuing.";
-const MAILBOX_CHANGED = "This action no longer matches the current mailbox.";
+const MAILBOX_CHANGED = "Это действие больше не относится к текущему почтовому ящику.";
 
 export function handle(
   channel: string,

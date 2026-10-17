@@ -22,7 +22,7 @@ export function validateAccountIntent(
   ) {
     return {
       success: false,
-      error: "This account is already connected. Use Reconnect instead.",
+      error: "Этот аккаунт уже подключён. Используйте «Переподключить».",
     };
   }
   if (
@@ -31,7 +31,7 @@ export function validateAccountIntent(
   ) {
     return {
       success: false,
-      error: "Sign-in returned a different account. Try again with the account you are reconnecting.",
+      error: "Вход выполнен в другой аккаунт. Повторите вход с переподключаемым аккаунтом.",
     };
   }
   if (
@@ -40,7 +40,7 @@ export function validateAccountIntent(
   ) {
     return {
       success: false,
-      error: "The account being reconnected is no longer active. Switch to it and try again.",
+      error: "Переподключаемый аккаунт больше не активен. Переключитесь на него и повторите.",
     };
   }
   const reconnectAccount = intent.type === "reconnect"
@@ -49,13 +49,13 @@ export function validateAccountIntent(
   if (intent.type === "reconnect" && !reconnectAccount) {
     return {
       success: false,
-      error: "This account is no longer connected. Add it again instead.",
+      error: "Этот аккаунт больше не подключён. Добавьте его заново.",
     };
   }
   if (reconnectAccount && reconnectAccount.providerType !== providerType) {
     return {
       success: false,
-      error: "This account is connected through a different provider.",
+      error: "Этот аккаунт подключён через другого провайдера.",
     };
   }
   return { success: true };

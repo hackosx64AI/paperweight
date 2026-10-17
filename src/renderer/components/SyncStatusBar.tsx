@@ -3,18 +3,18 @@ import type { SyncStatus } from "@shared/types";
 import { formatRunningSyncStatus, isOAuthTokenError } from "./syncStatus";
 
 function formatMonthYear(ts: number): string {
-  return new Date(ts).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  return new Date(ts).toLocaleDateString("ru-RU", { month: "short", year: "numeric" });
 }
 
 function formatRelativeTime(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "только что";
+  if (mins < 60) return `${mins} мин назад`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `${hours} ч назад`;
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return `${days} дн назад`;
 }
 
 export default function SyncStatusBar(): JSX.Element {
@@ -59,13 +59,13 @@ export default function SyncStatusBar(): JSX.Element {
       } else {
         result = {
           success: false,
-          error: "Reconnect is only available for Gmail and Microsoft accounts",
+          error: "Переподключение доступно только для аккаунтов Gmail и Microsoft",
         };
       }
       if (result.success) {
         window.api.startSync();
       } else {
-        setStatus((s) => ({ ...s, error: result.error ?? "Reconnect failed" }));
+        setStatus((s) => ({ ...s, error: result.error ?? "Не удалось переподключиться" }));
       }
     } finally {
       setReconnecting(false);
@@ -84,14 +84,14 @@ export default function SyncStatusBar(): JSX.Element {
             <span className="loading loading-spinner loading-xs"></span>
             <span className="text-warning">
               {analyzingMessages
-                ? "Analyzing messages…"
+                ? "Анализ писем…"
                 : formatRunningSyncStatus(status, now)}
             </span>
           </>
         ) : status.error ? (
           <>
             <span className="inline-block w-2 h-2 rounded-full bg-error"></span>
-            <span className="text-error">Sync failed</span>
+            <span className="text-error">Ошибка синхронизации</span>
             <span
               className="text-base-content/50 truncate max-w-lg"
               title={status.error}
@@ -103,13 +103,13 @@ export default function SyncStatusBar(): JSX.Element {
           <>
             <span className="inline-block w-2 h-2 rounded-full bg-warning"></span>
             <span className="text-base-content/70">
-              Refresh to analyze messages
+              Обновите, чтобы проанализировать письма
             </span>
           </>
         ) : (
           <>
             <span className="inline-block w-2 h-2 rounded-full bg-success"></span>
-            <span className="text-base-content/70">Synced</span>
+            <span className="text-base-content/70">Синхронизировано</span>
             {status.lastSyncAt && (
               <span className="text-base-content/50">
                 {formatRelativeTime(status.lastSyncAt)}
@@ -117,7 +117,7 @@ export default function SyncStatusBar(): JSX.Element {
             )}
             {!status.historicalDone && status.historicalCursor && (
               <span className="text-base-content/40">
-                · history back to {formatMonthYear(status.historicalCursor)}
+                · история с {formatMonthYear(status.historicalCursor)}
               </span>
             )}
           </>
@@ -134,13 +134,13 @@ export default function SyncStatusBar(): JSX.Element {
       >
         {status.running
           ? analyzingMessages
-            ? "Analyzing..."
-            : "Syncing..."
+            ? "Анализ..."
+            : "Синхронизация..."
           : reconnecting
-            ? "Reconnecting..."
+            ? "Переподключение..."
             : showReconnect
-              ? "Reconnect"
-              : "Refresh"}
+              ? "Переподключить"
+              : "Обновить"}
       </button>
     </div>
   );

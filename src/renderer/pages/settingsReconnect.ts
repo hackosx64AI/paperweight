@@ -4,5 +4,5 @@ interface ReconnectResult {
 }
 
 export function reconnectError(result: ReconnectResult): string | undefined {
-  return result.success ? undefined : result.error || "Reconnect failed";
+  return result.success ? undefined : result.error || "Не удалось переподключиться";
 }

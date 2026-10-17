@@ -11,8 +11,8 @@ export function getActivitySignal(lastSeen?: number): string {
 export const ACTIVITY_BADGE: Record<string, { label: string; color: string } | null> = {
   recent:  null,
   active:  null,
-  inactive:{ label: "1-2 years ago", color: "badge-secondary" },
-  stale:   { label: "2+ years ago",  color: "badge-secondary" },
-  dead:    { label: "5+ years ago",  color: "badge-secondary" },
+  inactive:{ label: "1–2 года назад", color: "badge-secondary" },
+  stale:   { label: "2+ года назад", color: "badge-secondary" },
+  dead:    { label: "5+ лет назад",  color: "badge-secondary" },
   unknown: null,
 };

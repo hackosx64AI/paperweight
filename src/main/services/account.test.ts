@@ -118,7 +118,7 @@ describe("account authentication", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "This account is already connected. Use Reconnect instead.",
+      error: "Этот аккаунт уже подключён. Используйте «Переподключить».",
     });
     expect(mockSaveCredentials).not.toHaveBeenCalled();
     expect(mockRegisterAccount).not.toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe("account authentication", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "This account is already connected. Use Reconnect instead.",
+      error: "Этот аккаунт уже подключён. Используйте «Переподключить».",
     });
     expect(mockSaveCredentials).not.toHaveBeenCalled();
     expect(mockRegisterAccount).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe("account authentication", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "This account is already connected. Use Reconnect instead.",
+      error: "Этот аккаунт уже подключён. Используйте «Переподключить».",
     });
     expect(mockTestImapConnection).not.toHaveBeenCalled();
     expect(mockTestSmtpConnection).not.toHaveBeenCalled();
@@ -305,7 +305,7 @@ describe("bulk account actions", () => {
 
     await expect(trashVendorMessages(7)).resolves.toEqual({
       success: false,
-      error: "One or more mailbox operations failed. Local records were kept.",
+      error: "Часть операций с почтовым ящиком не выполнена. Локальные записи сохранены.",
     });
     expect(deleteVendorMessages).not.toHaveBeenCalled();
     expect(insertActionLog).not.toHaveBeenCalled();

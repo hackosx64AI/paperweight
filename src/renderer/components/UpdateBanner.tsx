@@ -16,31 +16,31 @@ export default function UpdateBanner({ info, onDismiss }: UpdateBannerProps): JS
       <div className="flex-1">
         <p className="font-medium">
           {info.isMajor
-            ? `Major update available — v${info.latest}`
-            : `New version available — v${info.latest}`}
+            ? `Доступно крупное обновление — v${info.latest}`
+            : `Доступна новая версия — v${info.latest}`}
         </p>
         <p className="text-sm text-base-content/60 mt-0.5">
           {info.isMajor
-            ? "This release contains significant new features and changes. "
-            : `You have v${info.current}. `}
+            ? "В этом выпуске значительные новые функции и изменения. "
+            : `У вас v${info.current}. `}
           <button
             className="underline hover:no-underline"
             onClick={() => window.api.openExternal("https://github.com/wslyvh/paperweight/releases")}
           >
-            View release
+            Открыть выпуск
           </button>
         </p>
         <button
           className="btn btn-primary btn-sm mt-2"
           onClick={() => window.api.installUpdate()}
         >
-          Restart to update
+          Перезапустить и обновить
         </button>
       </div>
       <button
         className="btn btn-ghost btn-xs"
         onClick={onDismiss}
-        aria-label="Dismiss update notification"
+        aria-label="Скрыть уведомление об обновлении"
       >
         ✕
       </button>

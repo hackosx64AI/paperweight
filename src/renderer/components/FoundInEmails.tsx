@@ -33,7 +33,7 @@ function FindingPagination({
     <div className="flex items-center gap-1">
       <button
         className="btn btn-sm btn-ghost btn-circle"
-        aria-label="Previous findings page"
+        aria-label="Предыдущая страница"
         disabled={page === 1}
         onClick={() => onPageChange(page - 1)}
       >
@@ -44,7 +44,7 @@ function FindingPagination({
       </span>
       <button
         className="btn btn-sm btn-ghost btn-circle"
-        aria-label="Next findings page"
+        aria-label="Следующая страница"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
       >
@@ -148,9 +148,9 @@ export default function FoundInEmails({
             className="w-4 h-4 text-base-content/50 shrink-0 rotate-90"
             strokeWidth={2}
           />
-          <span className="font-semibold shrink-0">Personal data</span>
+          <span className="font-semibold shrink-0">Личные данные</span>
           <span className="text-sm text-base-content/50 truncate">
-            Loading...
+            Загрузка...
           </span>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function FoundInEmails({
           }`}
           strokeWidth={2}
         />
-        <span className="font-semibold shrink-0">Personal data</span>
+        <span className="font-semibold shrink-0">Личные данные</span>
         <span
           className={`badge badge-sm shrink-0 tabular-nums ${
             values.length > 0 ? "badge-neutral" : "badge-ghost"
@@ -181,8 +181,8 @@ export default function FoundInEmails({
           {values.length}
         </span>
         <span className="text-sm text-base-content/60 truncate">
-          {totalValues > 0 ? "Found in" : "Nothing found in"} {scannedMessages}{" "}
-          {scannedMessages === 1 ? "email" : "emails"} from {vendorName}
+          {totalValues > 0 ? "Найдено в" : "Ничего не найдено в"} {scannedMessages}{" "}
+          {scannedMessages % 10 === 1 && scannedMessages % 100 !== 11 ? "письме" : "письмах"} от {vendorName}
         </span>
       </div>
 
@@ -192,14 +192,14 @@ export default function FoundInEmails({
         <div>
           <p className="text-sm text-base-content/60 px-2 pb-3">
             {totalValues > 0
-              ? "This may be incomplete (attachments and sent mail aren't included) and doesn't mean the company still stores it."
-              : "Attachments and sent mail aren't included."}
+              ? "Список может быть неполным (вложения и отправленные письма не учитываются) и не означает, что компания до сих пор хранит эти данные."
+              : "Вложения и отправленные письма не учитываются."}
           </p>
           {totalValues > 0 && (
             <div className="flex items-center px-1">
               <div
                 role="tablist"
-                aria-label="Finding status and confidence"
+                aria-label="Статус и достоверность находок"
                 className="tabs tabs-md flex gap-1"
               >
                 {CONFIDENCE_OPTIONS.map((tab) => {
@@ -232,7 +232,7 @@ export default function FoundInEmails({
                 <button
                   role="tab"
                   aria-selected={currentTab === "suppressed"}
-                  title="Values you marked as not yours"
+                  title="Значения, которые вы отметили как не свои"
                   disabled={suppressedValues.length === 0}
                   className={`tab rounded-lg transition-colors ${
                     currentTab === "suppressed"
@@ -244,7 +244,7 @@ export default function FoundInEmails({
                     setPage(1);
                   }}
                 >
-                  Not mine
+                  Не моё
                   {suppressedValues.length > 0
                     ? ` (${suppressedValues.length})`
                     : ""}
@@ -253,8 +253,8 @@ export default function FoundInEmails({
               <div className="ml-auto flex items-center gap-1">
                 <button
                   className="btn btn-sm btn-ghost btn-circle shrink-0"
-                  title={showValues ? "Hide values" : "Show values"}
-                  aria-label={showValues ? "Hide values" : "Show values"}
+                  title={showValues ? "Скрыть значения" : "Показать значения"}
+                  aria-label={showValues ? "Скрыть значения" : "Показать значения"}
                   disabled={busy}
                   onClick={toggleReveal}
                 >
@@ -275,7 +275,7 @@ export default function FoundInEmails({
   
           <div className="mt-2">
             {pageValues.length === 0 ? (
-              <p className="text-sm text-base-content/50 px-4 py-2">No data found.</p>
+              <p className="text-sm text-base-content/50 px-4 py-2">Данные не найдены.</p>
             ) : (
               <PiiValueList
                 values={pageValues}

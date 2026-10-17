@@ -19,7 +19,7 @@ export function CaseStatusBadge({ item }: { item: GdprCaseSummary }): JSX.Elemen
       </span>
     );
   }
-  return <span className={`badge badge-xs shrink-0 ${CASE_CLOSED_BADGE}`}>Closed</span>;
+  return <span className={`badge badge-xs shrink-0 ${CASE_CLOSED_BADGE}`}>Закрыто</span>;
 }
 
 export function CaseRequestBadge({

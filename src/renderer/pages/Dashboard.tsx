@@ -9,6 +9,7 @@ import type {
 import { useLicense, useOpenProUpgrade } from "../context/LicenseContext";
 import TrendChartCard from "../components/TrendChartCard";
 import ImpactBlock from "../components/ImpactBlock";
+import { plural } from "@shared/formatting";
 import { AlertTriangle, ArrowRight, ChevronRight, Contact, FolderClosed, Inbox, Mail } from "lucide-react";
 
 export default function Dashboard(): JSX.Element {
@@ -76,7 +77,7 @@ export default function Dashboard(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold">Обзор</h1>
 
       {!license.active && (
         <div
@@ -85,10 +86,10 @@ export default function Dashboard(): JSX.Element {
         >
           <div>
             <p className="font-semibold text-base-content">
-              Upgrade to Pro
+              Перейти на Pro
             </p>
             <p className="text-sm text-base-content/60">
-              Clean up what you've found. Unsubscribe, remove unwanted mail, send privacy requests, use multiple accounts, and connect MCP agents.
+              Наведите порядок в найденном: отписывайтесь, удаляйте ненужную почту, отправляйте запросы о персональных данных, подключайте несколько аккаунтов и MCP-агентов.
             </p>
           </div>
           <ArrowRight
@@ -112,10 +113,10 @@ export default function Dashboard(): JSX.Element {
             />
             <div className="min-w-0">
               <p className="font-semibold text-base-content">
-                Finish setting up your account
+                Завершите настройку аккаунта
               </p>
               <p className="text-sm text-base-content/60">
-                Add your outgoing (SMTP) server to enable sending from this account.
+                Добавьте сервер исходящей почты (SMTP), чтобы отправлять письма с этого аккаунта.
               </p>
             </div>
           </div>
@@ -134,7 +135,7 @@ export default function Dashboard(): JSX.Element {
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
-              Emails
+              Письма
             </div>
             <Inbox className="w-5 h-5 text-info" aria-hidden="true" />
           </div>
@@ -150,7 +151,7 @@ export default function Dashboard(): JSX.Element {
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
-              Lists
+              Рассылки
             </div>
             <Mail className="w-5 h-5 text-primary" aria-hidden="true" />
           </div>
@@ -158,7 +159,7 @@ export default function Dashboard(): JSX.Element {
             {stats.mailingListCount.toLocaleString()}
           </div>
           <p className="text-base-content/50 text-xs mt-1">
-            {stats.mailingListsActioned.toLocaleString()} actioned · {stats.activeSubscriptions.toLocaleString()} priorities
+            обработано {stats.mailingListsActioned.toLocaleString()} · приоритетных {stats.activeSubscriptions.toLocaleString()}
           </p>
         </div>
 
@@ -168,7 +169,7 @@ export default function Dashboard(): JSX.Element {
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
-              Accounts
+              Аккаунты
             </div>
             <Contact className="w-5 h-5 text-secondary" aria-hidden="true" />
           </div>
@@ -176,7 +177,7 @@ export default function Dashboard(): JSX.Element {
             {stats.uniqueVendors.toLocaleString()}
           </div>
           <p className="text-base-content/50 text-xs mt-1">
-            {stats.reviewedVendors.toLocaleString()} reviewed · {stats.highRiskUnreviewed.toLocaleString()} high risk
+            проверено {stats.reviewedVendors.toLocaleString()} · высокий риск {stats.highRiskUnreviewed.toLocaleString()}
           </p>
         </div>
 
@@ -186,7 +187,7 @@ export default function Dashboard(): JSX.Element {
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
-              Cases
+              Обращения
             </div>
             <FolderClosed className="w-5 h-5 text-case" aria-hidden="true" />
           </div>
@@ -195,7 +196,7 @@ export default function Dashboard(): JSX.Element {
           </div>
           <p className="text-base-content/50 text-xs mt-1">
             {dueCases.length > 0
-              ? `${dueCases.length.toLocaleString()} need${dueCases.length !== 1 ? "" : "s"} attention`
+              ? `требуют внимания: ${dueCases.length.toLocaleString()}`
               : " "}
           </p>
         </div>
@@ -206,12 +207,12 @@ export default function Dashboard(): JSX.Element {
       {/* Action Items */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Actions</h2>
+          <h2 className="text-lg font-semibold">Действия</h2>
           <button
             className="text-sm text-base-content/50 hover:text-base-content/80 transition-colors"
             onClick={() => navigate("/activity")}
           >
-            View activity log →
+            Журнал действий →
           </button>
         </div>
 
@@ -223,7 +224,7 @@ export default function Dashboard(): JSX.Element {
                 onClick={() => navigate("/cases", { state: { filter: "needs_attention" } })}
               >
                 <span>
-                  {dueCases.length} data {dueCases.length !== 1 ? "requests need" : "request needs"} your attention
+                  {dueCases.length} {plural(dueCases.length, "запрос о данных требует", "запроса о данных требуют", "запросов о данных требуют")} вашего внимания
                 </span>
                 <ChevronRight className="w-5 h-5 text-base-content/50" aria-hidden="true" />
               </div>
@@ -237,8 +238,7 @@ export default function Dashboard(): JSX.Element {
                 }
               >
                 <span>
-                  {stats.breachedCount} account
-                  {stats.breachedCount !== 1 ? "s are" : " is"} on a known data breach list
+                  {stats.breachedCount} {plural(stats.breachedCount, "аккаунт найден", "аккаунта найдены", "аккаунтов найдены")} в базах утечек данных
                 </span>
                 <ChevronRight
                   className="w-5 h-5 text-base-content/50"
@@ -253,8 +253,7 @@ export default function Dashboard(): JSX.Element {
                 onClick={() => navigate("/mail", { state: { preset: "priorities" } })}
               >
                 <span>
-                  {stats.activeSubscriptions} active mailing list
-                  {stats.activeSubscriptions !== 1 ? "s" : ""} to unsubscribe
+                  {stats.activeSubscriptions} {plural(stats.activeSubscriptions, "активная рассылка", "активные рассылки", "активных рассылок")} для отписки
                 </span>
                 <ChevronRight
                   className="w-5 h-5 text-base-content/50"
@@ -271,8 +270,7 @@ export default function Dashboard(): JSX.Element {
                 }
               >
                 <span>
-                  {stats.highRiskUnreviewed} high risk account
-                  {stats.highRiskUnreviewed !== 1 ? "s" : ""} to review
+                  {stats.highRiskUnreviewed} {plural(stats.highRiskUnreviewed, "аккаунт", "аккаунта", "аккаунтов")} с высоким риском на проверку
                 </span>
                 <ChevronRight
                   className="w-5 h-5 text-base-content/50"
@@ -283,7 +281,7 @@ export default function Dashboard(): JSX.Element {
           </div>
         ) : (
           <div className="p-4 bg-base-200 rounded-lg text-center text-base-content/60">
-            You're all caught up
+            Всё в порядке, дел нет
           </div>
         )}
       </div>
@@ -291,8 +289,8 @@ export default function Dashboard(): JSX.Element {
       {/* Trend chart */}
       <TrendChartCard
         trend={trend}
-        title="Daily emails"
-        description="Total emails received over time"
+        title="Писем в день"
+        description="Количество полученных писем по дням"
         trendDirection="down"
       />
     </div>

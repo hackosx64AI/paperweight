@@ -4,14 +4,14 @@ import type { PiiOverview, PiiType, PiiValue } from "./types";
 export const PII_TYPES: PiiType[] = [...FINDING_SENSITIVITY_ORDER];
 
 export const PII_LABELS: Record<PiiType, string> = {
-  credit_card: "Card",
+  credit_card: "Карта",
   iban: "IBAN",
-  national_id: "ID",
-  phone: "Phone",
-  address: "Address",
-  postal_code: "Postal",
+  national_id: "Документ",
+  phone: "Телефон",
+  address: "Адрес",
+  postal_code: "Индекс",
   email: "Email",
-  date_of_birth: "Birthdate",
+  date_of_birth: "Дата рожд.",
 };
 
 export type FindingConfidence = "high" | "possible" | "low";
@@ -27,18 +27,18 @@ export interface ConfidenceOption {
 export const CONFIDENCE_OPTIONS: ConfidenceOption[] = [
   {
     id: "high",
-    label: "High",
-    title: "Profile matches and values found across multiple companies",
+    label: "Высокая",
+    title: "Совпадения с профилем и значения, найденные у нескольких компаний",
   },
   {
     id: "possible",
-    label: "Possible",
-    title: "Other values found in these emails",
+    label: "Возможная",
+    title: "Прочие значения, найденные в этих письмах",
   },
   {
     id: "low",
-    label: "Low",
-    title: "Values with a weaker ownership signal",
+    label: "Низкая",
+    title: "Значения со слабым признаком принадлежности вам",
   },
 ];
 
@@ -101,6 +101,8 @@ export function queryPiiOverview(
   if (search) {
     result = result.filter((value) =>
       PII_LABELS[value.type].toLowerCase().includes(search)
+      // Подписи переведены; ключ типа ("postal_code") оставляет рабочим английский поиск, в т.ч. из MCP.
+      || value.type.includes(search)
       || value.maskedValue.toLowerCase().includes(search)
       || !!revealed?.get(value.ref)?.toLowerCase().includes(search)
     );

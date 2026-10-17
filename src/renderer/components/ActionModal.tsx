@@ -37,7 +37,7 @@ export default function ActionModal({
   title,
   children,
   confirmLabel,
-  cancelLabel = "Cancel",
+  cancelLabel = "Отмена",
   secondaryLabel,
   confirmVariant = "neutral",
   secondaryVariant = "warning",
@@ -105,7 +105,7 @@ export default function ActionModal({
               className="btn btn-ghost btn-sm btn-square"
               onClick={handleCopy}
               disabled={loading}
-              title={copied ? "Copied" : "Copy to clipboard"}
+              title={copied ? "Скопировано" : "Копировать в буфер обмена"}
             >
               <Copy className="w-4 h-4" />
             </button>
@@ -156,7 +156,7 @@ export default function ActionModal({
             else onCancel();
           }}
         >
-          close
+          закрыть
         </button>
       </form>
     </dialog>

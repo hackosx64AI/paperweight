@@ -25,7 +25,7 @@ describe("SyncStatusBar progress", () => {
           now,
         ),
       ).toBe(
-        "Syncing... 2,614 messages processed · Jan–Mar 2025 · 18m elapsed",
+        "Синхронизация... обработано 2,614 писем · янв.–март 2025 · прошло 18 мин",
       );
     },
   );
@@ -42,7 +42,7 @@ describe("SyncStatusBar progress", () => {
         },
         startedAt,
       ),
-    ).toBe("Syncing... 0 messages processed · 0m elapsed");
+    ).toBe("Синхронизация... обработано 0 писем · прошло 0 мин");
   });
 
   it("omits the period when none is available", () => {
@@ -57,7 +57,7 @@ describe("SyncStatusBar progress", () => {
         },
         now,
       ),
-    ).toBe("Syncing... 2,614 messages processed · 18m elapsed");
+    ).toBe("Синхронизация... обработано 2,614 писем · прошло 18 мин");
   });
 });
 
@@ -65,7 +65,7 @@ describe("SyncStatusBar OAuth recovery", () => {
   it("recognizes normalized authorization-expired errors", () => {
     expect(
       isOAuthTokenError(
-        "Authorization expired. Reconnect your account to continue syncing.",
+        "Авторизация истекла. Переподключите аккаунт, чтобы продолжить синхронизацию.",
       ),
     ).toBe(true);
   });

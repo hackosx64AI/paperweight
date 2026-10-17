@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { PiiCompanyOrder, PiiValue, PiiValueCompany } from "@shared/types";
-import { formatRelativeDate } from "@shared/formatting";
+import { formatRelativeDate, plural } from "@shared/formatting";
 import { PII_LABELS } from "@shared/pii-query";
 import { ArrowDown, ArrowUp, ChevronRight, CircleCheck, CircleX } from "lucide-react";
 import ActionModal from "./ActionModal";
@@ -13,7 +13,7 @@ import ActionModal from "./ActionModal";
 
 // checkbox · chevron · data type · value · hover action · badges
 const ROW_GRID =
-  "grid grid-cols-[24px_20px_72px_minmax(0,1fr)_auto_176px] items-center gap-3";
+  "grid grid-cols-[24px_20px_96px_minmax(0,1fr)_auto_176px] items-center gap-3";
 
 /** What the value's own list says about it, and what the action does to it. */
 type PiiListMode = "active" | "suppressed";
@@ -29,11 +29,11 @@ function PiiValueBadges({ value }: PiiValueBadgesProps): JSX.Element | null {
   return (
     <>
       {value.isMatch && (
-        <span className="badge badge-xs badge-primary badge-soft shrink-0">Match</span>
+        <span className="badge badge-xs badge-primary badge-soft shrink-0">Совпадение</span>
       )}
       {value.companyCount > 1 && (
         <span className="badge badge-xs badge-soft shrink-0 tabular-nums">
-          {value.companyCount} companies
+          {value.companyCount} {plural(value.companyCount, "компания", "компании", "компаний")}
         </span>
       )}
     </>
@@ -154,8 +154,8 @@ export default function PiiValueList({
         <div className="col-span-2 flex items-center gap-1">
           <button
             className="btn btn-ghost btn-sm btn-square tooltip text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 disabled:opacity-25"
-            data-tip="It's mine"
-            aria-label="It's mine"
+            data-tip="Это моё"
+            aria-label="Это моё"
             disabled={busy || selected.size === 0}
             onClick={() => setBulkAction("confirm")}
           >
@@ -164,8 +164,8 @@ export default function PiiValueList({
           {!restoring && (
             <button
               className="btn btn-ghost btn-sm btn-square tooltip text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 disabled:opacity-25"
-              data-tip="Not mine"
-              aria-label="Not mine"
+              data-tip="Не моё"
+              aria-label="Не моё"
               disabled={busy || selected.size === 0}
               onClick={() => setBulkAction("suppress")}
             >
@@ -174,7 +174,7 @@ export default function PiiValueList({
           )}
           {selected.size > 0 && (
             <span className="text-sm tabular-nums whitespace-nowrap text-base-content/50 ml-1">
-              {selected.size} selected
+              выбрано: {selected.size}
             </span>
           )}
         </div>
@@ -233,11 +233,11 @@ export default function PiiValueList({
                 >
                   <span
                     className="tooltip tooltip-top"
-                    data-tip={value.isMatch ? "Already in your profile" : "It's mine"}
+                    data-tip={value.isMatch ? "Уже есть в вашем профиле" : "Это моё"}
                   >
                     <button
                       className="btn btn-ghost btn-sm btn-square text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80"
-                      aria-label="It's mine"
+                      aria-label="Это моё"
                       disabled={busy || value.isMatch}
                       onClick={() => runAction([value], "confirm")}
                     >
@@ -249,13 +249,13 @@ export default function PiiValueList({
                       className="tooltip tooltip-top"
                       data-tip={
                         value.isMatch
-                          ? "Remove this value from your profile first"
-                          : "Not mine"
+                          ? "Сначала удалите это значение из профиля"
+                          : "Не моё"
                       }
                     >
                       <button
                         className="btn btn-ghost btn-sm btn-square text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80"
-                        aria-label="Not mine"
+                        aria-label="Не моё"
                         disabled={busy || value.isMatch}
                         onClick={() => runAction([value], "suppress")}
                       >
@@ -275,8 +275,8 @@ export default function PiiValueList({
               <div className="border-t border-base-300 bg-base-300/50 rounded-b-2xl">
                 <div className="px-4 pt-3 pb-2 flex items-center gap-2">
                   <span className="text-sm font-medium text-base-content/60">
-                    Found at {value.companyCount}{" "}
-                    {value.companyCount === 1 ? "company" : "companies"}
+                    Найдено у {value.companyCount}{" "}
+                    {value.companyCount % 10 === 1 && value.companyCount % 100 !== 11 ? "компании" : "компаний"}
                   </span>
                   <button
                     className="btn btn-ghost btn-xs ml-auto text-base-content/50 gap-1"
@@ -285,7 +285,7 @@ export default function PiiValueList({
                       toggleCompanyOrder();
                     }}
                   >
-                    {companyOrder === "recent" ? "Most recent" : "Oldest"}
+                    {companyOrder === "recent" ? "Сначала новые" : "Сначала старые"}
                     {companyOrder === "recent" ? (
                       <ArrowDown className="w-3 h-3" strokeWidth={2} />
                     ) : (
@@ -299,7 +299,7 @@ export default function PiiValueList({
                   </div>
                 ) : valueCompanies.length === 0 ? (
                   <div className="p-4 text-center text-base-content/50">
-                    No companies found
+                    Компании не найдены
                   </div>
                 ) : (
                   <div className="divide-y divide-base-300">
@@ -334,8 +334,8 @@ export default function PiiValueList({
       {bulkAction && (
         <ActionModal
           isOpen
-          title={bulkAction === "confirm" ? "It's mine" : "Not mine"}
-          confirmLabel={bulkAction === "confirm" ? "Add to profile" : "Remove"}
+          title={bulkAction === "confirm" ? "Это моё" : "Не моё"}
+          confirmLabel={bulkAction === "confirm" ? "Добавить в профиль" : "Убрать"}
           confirmVariant="primary"
           onConfirm={async () => {
             const action = bulkAction;
@@ -348,17 +348,13 @@ export default function PiiValueList({
           <p>
             {bulkAction === "confirm" ? (
               <>
-                {selectedValues.length}{" "}
-                {selectedValues.length === 1 ? "value is" : "values are"} your personal
-                data. {selectedValues.length === 1 ? "It" : "They"} will be added to
-                your profile and shown as a match everywhere.
+                Выбрано значений: {selectedValues.length}. Это ваши личные данные — они
+                будут добавлены в профиль и везде отмечены как совпадение.
               </>
             ) : (
               <>
-                {selectedValues.length}{" "}
-                {selectedValues.length === 1 ? "value is" : "values are"} not your
-                personal data. They move to the Not mine list for every company that
-                holds them.
+                Выбрано значений: {selectedValues.length}. Это не ваши личные данные —
+                они переместятся в список «Не моё» для всех компаний, у которых они есть.
               </>
             )}
           </p>

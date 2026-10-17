@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { Vendor, VendorQuery, UnsubscribeEntry } from "@shared/types";
 import { MARKETING_ACTION_TYPES } from "@shared/types";
-import { formatRelativeDate } from "@shared/formatting";
+import { formatRelativeDate, plural } from "@shared/formatting";
 import { parseMailto, PAPERWEIGHT_UNSUB_BODY } from "@shared/utils";
 import { ArrowUpDown, BadgeCheck, BellOff, ChevronLeft, ChevronRight, Flag, SlidersHorizontal, Trash2 } from "lucide-react";
 import ActionModal from "../components/ActionModal";
@@ -97,9 +97,9 @@ function FilterGroup({ label, options, labels, value, onChange, colors }: Filter
 // ---------- presets ----------
 
 const MAIL_PRESETS = [
-  { id: "whitelisted", label: "Whitelisted" },
-  { id: "priorities",  label: "Priorities" },
-  { id: "breached",    label: "Breached" },
+  { id: "whitelisted", label: "Белый список" },
+  { id: "priorities",  label: "Приоритетные" },
+  { id: "breached",    label: "Утечки" },
 ] as const;
 
 type MailPresetId = typeof MAIL_PRESETS[number]["id"];
@@ -107,11 +107,11 @@ type MailPresetId = typeof MAIL_PRESETS[number]["id"];
 // ---------- helpers ----------
 
 const SORT_OPTIONS = [
-  { value: "message_count", label: "Most emails" },
-  { value: "last_seen", label: "Latest" },
-  { value: "last_seen_asc", label: "Oldest" },
-  { value: "name", label: "Name" },
-  { value: "root_domain", label: "Domain" },
+  { value: "message_count", label: "Больше писем" },
+  { value: "last_seen", label: "Сначала новые" },
+  { value: "last_seen_asc", label: "Сначала старые" },
+  { value: "name", label: "По названию" },
+  { value: "root_domain", label: "По домену" },
 ];
 
 const ROW_GRID =
@@ -145,12 +145,12 @@ function pickBestMailto(
 
 function unsubDescription(entry: UnsubscribeEntry, vendorName: string) {
   if (entry.method === "rfc8058") {
-    return <>Paperweight will automatically send an unsubscribe request to <strong>{vendorName}</strong>.</>;
+    return <>Paperweight автоматически отправит запрос на отписку <strong>{vendorName}</strong>.</>;
   }
   if (entry.url.startsWith("mailto:")) {
-    return <>Paperweight will send an unsubscribe email from your account to <strong>{vendorName}</strong>.</>;
+    return <>Paperweight отправит письмо об отписке с вашего аккаунта <strong>{vendorName}</strong>.</>;
   }
-  return <>The unsubscribe page for <strong>{vendorName}</strong> will open in your browser. Complete the process there.</>;
+  return <>Страница отписки <strong>{vendorName}</strong> откроется в браузере. Завершите отписку там.</>;
 }
 
 const BATCH_LABELS: Record<
@@ -158,19 +158,19 @@ const BATCH_LABELS: Record<
   { title: string; progressVerb: string; successVerb: string }
 > = {
   unsubscribe: {
-    title: "Batch Unsubscribe",
-    progressVerb: "Unsubscribing",
-    successVerb: "unsubscribed",
+    title: "Массовая отписка",
+    progressVerb: "Отписка",
+    successVerb: "отписано",
   },
   spam: {
-    title: "Report Spam",
-    progressVerb: "Reporting spam",
-    successVerb: "reported",
+    title: "Пометить как спам",
+    progressVerb: "Отметка спама",
+    successVerb: "отмечено",
   },
   trash: {
-    title: "Move to Trash",
-    progressVerb: "Deleting",
-    successVerb: "moved to trash",
+    title: "Переместить в корзину",
+    progressVerb: "Удаление",
+    successVerb: "перемещено в корзину",
   },
 };
 
@@ -479,7 +479,7 @@ export default function Mail(): JSX.Element {
     for (let i = 0; i < batchVendors.length; i++) {
       setBatch((prev) => (prev ? { ...prev, current: i + 1 } : prev));
       const vendor = batchVendors[i];
-      const name = vendor.name || vendor.root_domain || "Unknown";
+      const name = vendor.name || vendor.root_domain || "Неизвестно";
       try {
         requireSameMailbox(origin);
         if (kind === "unsubscribe") {
@@ -550,7 +550,7 @@ export default function Mail(): JSX.Element {
         failed.push(name);
         if (err instanceof Error && err.message === MAILBOX_CHANGED) {
           for (let j = i + 1; j < batchVendors.length; j++) {
-            failed.push(batchVendors[j].name || batchVendors[j].root_domain || "Unknown");
+            failed.push(batchVendors[j].name || batchVendors[j].root_domain || "Неизвестно");
           }
           break;
         }
@@ -649,7 +649,7 @@ export default function Mail(): JSX.Element {
         if (!result.success) {
           setUnsubResult({
             ...unsubResult,
-            errorMessage: result.error ?? "Unsubscribed, but couldn't move emails to trash.",
+            errorMessage: result.error ?? "Отписка выполнена, но переместить письма в корзину не удалось.",
           });
           return;
         }
@@ -671,7 +671,7 @@ export default function Mail(): JSX.Element {
       if (!result.success) {
         setUnsubResult({
           ...unsubResult,
-          errorMessage: result.error ?? "Failed to report spam.",
+          errorMessage: result.error ?? "Не удалось пометить как спам.",
         });
         return;
       }
@@ -697,7 +697,7 @@ export default function Mail(): JSX.Element {
           await window.api.markListUnsubscribed(vendor.id, entry.url);
           setUnsubResult({ vendor, kind: "success", fallbackMethods: [], trashAlso: unsubResult.trashAlso });
         } else {
-          setToast(result.error ?? "Could not send the unsubscribe email.");
+          setToast(result.error ?? "Не удалось отправить письмо об отписке.");
         }
       } else {
         await window.api.openUnsubscribeUrl(entry.url);
@@ -728,7 +728,7 @@ export default function Mail(): JSX.Element {
             kind: "success",
             fallbackMethods: [],
             trashAlso,
-            errorMessage: result.error ?? "Unsubscribed, but couldn't move emails to trash.",
+            errorMessage: result.error ?? "Отписка выполнена, но переместить письма в корзину не удалось.",
           });
           return;
         }
@@ -750,7 +750,7 @@ export default function Mail(): JSX.Element {
       if (!result.success) {
         setUnsubCheck({
           ...unsubCheck,
-          errorMessage: result.error ?? "Failed to report spam.",
+          errorMessage: result.error ?? "Не удалось пометить как спам.",
         });
         return;
       }
@@ -772,7 +772,7 @@ export default function Mail(): JSX.Element {
     try {
       const spamResult = await window.api.reportSpamVendor(vendor.id);
       if (!spamResult.success) {
-        setModalError(spamResult.error ?? "Failed to report spam.");
+        setModalError(spamResult.error ?? "Не удалось пометить как спам.");
         return;
       }
       setModal(null);
@@ -792,7 +792,7 @@ export default function Mail(): JSX.Element {
     try {
       const result = await window.api.trashVendorMessages(vendor.id, [...MARKETING_ACTION_TYPES]);
       if (!result.success) {
-        setModalError(result.error ?? "Failed to move emails to trash.");
+        setModalError(result.error ?? "Не удалось переместить письма в корзину.");
         return;
       }
       setModal(null);
@@ -817,10 +817,10 @@ export default function Mail(): JSX.Element {
             title={labels.title}
             confirmLabel={
               batch.kind === "unsubscribe"
-                ? `Unsubscribe ${selectedIds.size} ${selectedIds.size === 1 ? "company" : "companies"}`
+                ? `Отписаться: ${selectedIds.size} ${plural(selectedIds.size, "компания", "компании", "компаний")}`
                 : batch.kind === "spam"
-                  ? "Report spam"
-                  : "Move to trash"
+                  ? "Пометить как спам"
+                  : "В корзину"
             }
             confirmVariant="primary"
             onConfirm={runBatch}
@@ -829,9 +829,9 @@ export default function Mail(): JSX.Element {
             {batch.kind === "unsubscribe" && (
               <>
                 <p>
-                  Paperweight will automatically send unsubscribe requests to{" "}
+                  Paperweight автоматически отправит запросы на отписку{" "}
                   <strong>{selectedIds.size}</strong>{" "}
-                  {selectedIds.size === 1 ? "company" : "companies"}.
+                  {plural(selectedIds.size, "компании", "компаниям", "компаниям")}.
                 </p>
                 <label className="flex items-center gap-2 cursor-pointer mt-1">
                   <input
@@ -844,20 +844,20 @@ export default function Mail(): JSX.Element {
                       )
                     }
                   />
-                  <span>Also move all emails to trash after unsubscribing</span>
+                  <span>После отписки также переместить все письма в корзину</span>
                 </label>
               </>
             )}
             {batch.kind === "spam" && (
               <p>
-                Spam reporting works best for unsolicited mail. For lists you
-                signed up for, unsubscribing is more effective and respectful.
+                Отметка «спам» подходит для писем, на которые вы не подписывались. Для рассылок,
+                на которые вы подписались сами, отписка эффективнее и корректнее.
               </p>
             )}
             {batch.kind === "trash" && (
               <p>
-                These senders will continue emailing you. Consider unsubscribing
-                first to stop receiving new emails.
+                Эти отправители продолжат вам писать. Чтобы перестать получать
+                новые письма, сначала отпишитесь.
               </p>
             )}
           </ActionModal>
@@ -884,18 +884,18 @@ export default function Mail(): JSX.Element {
         <ActionModal
           isOpen
           title={labels.title}
-          confirmLabel="Done"
+          confirmLabel="Готово"
           confirmVariant="primary"
           onConfirm={closeBatch}
           onCancel={closeBatch}
         >
           <p>
-            Done — {batch.succeeded.length} {labels.successVerb}
-            {batch.failed.length > 0 ? `, ${batch.failed.length} failed.` : "."}
+            Готово — {labels.successVerb}: {batch.succeeded.length}
+            {batch.failed.length > 0 ? `, ошибок: ${batch.failed.length}.` : "."}
           </p>
           {batch.failed.length > 0 && (
             <p className="text-base-content/60">
-              Failed: {batch.failed.join(", ")}
+              Не удалось: {batch.failed.join(", ")}
             </p>
           )}
         </ActionModal>
@@ -905,14 +905,14 @@ export default function Mail(): JSX.Element {
     // rfc8058 result — success or failure
     if (unsubResult) {
       const name =
-        unsubResult.vendor.name || unsubResult.vendor.root_domain || "this sender";
+        unsubResult.vendor.name || unsubResult.vendor.root_domain || "этот отправитель";
 
       if (unsubResult.kind === "success") {
         return (
           <ActionModal
             isOpen
-            title="Unsubscribe"
-            confirmLabel="Done"
+            title="Отписка"
+            confirmLabel="Готово"
             confirmVariant="primary"
             onConfirm={handleUnsubResultDone}
             onCancel={() => {
@@ -924,7 +924,7 @@ export default function Mail(): JSX.Element {
             loading={actionLoading}
           >
             <p>
-              Successfully unsubscribed from <strong>{name}</strong>.
+              Вы отписались от <strong>{name}</strong>.
             </p>
             {unsubResult.errorMessage && (
               <p className="text-error text-sm">{unsubResult.errorMessage}</p>
@@ -940,7 +940,7 @@ export default function Mail(): JSX.Element {
                   )
                 }
               />
-              <span>Also move all emails to trash</span>
+              <span>Также переместить все письма в корзину</span>
             </label>
           </ActionModal>
         );
@@ -951,22 +951,22 @@ export default function Mail(): JSX.Element {
       return (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          secondaryLabel="Mark as spam"
+          title="Отписка"
+          secondaryLabel="Пометить как спам"
           secondaryVariant="neutral"
           onSecondary={handleUnsubResultSpam}
           onCancel={() => !actionLoading && setUnsubResult(null)}
           loading={actionLoading}
         >
           <p>
-            Couldn't automatically unsubscribe from <strong>{name}</strong>.
+            Не удалось автоматически отписаться от <strong>{name}</strong>.
           </p>
           {unsubResult.errorMessage && (
             <p className="text-xs text-base-content/50 break-all">{unsubResult.errorMessage}</p>
           )}
           {fallbackMethods.length > 0 && (
             <div className="space-y-2 mt-1">
-              <p className="text-base-content/60">Try another method:</p>
+              <p className="text-base-content/60">Попробуйте другой способ:</p>
               {fallbackMethods.map((entry) => (
                 <div
                   key={entry.method}
@@ -980,7 +980,7 @@ export default function Mail(): JSX.Element {
                     disabled={actionLoading}
                     onClick={() => handleUnsubResultFallback(entry)}
                   >
-                    Try
+                    Попробовать
                   </button>
                 </div>
               ))}
@@ -995,14 +995,14 @@ export default function Mail(): JSX.Element {
       const name =
         unsubCheck.vendor.name ||
         unsubCheck.vendor.root_domain ||
-        "this sender";
+        "этот отправитель";
       return (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          secondaryLabel="No, mark as spam"
+          title="Отписка"
+          secondaryLabel="Нет, пометить как спам"
           secondaryVariant="neutral"
-          confirmLabel="Yes, mark done"
+          confirmLabel="Да, готово"
           confirmVariant="primary"
           onSecondary={handleUnsubCheckSpam}
           onConfirm={handleUnsubCheckDone}
@@ -1010,7 +1010,7 @@ export default function Mail(): JSX.Element {
           loading={actionLoading}
         >
           <p>
-            Did you successfully unsubscribe from <strong>{name}</strong>?
+            Удалось отписаться от <strong>{name}</strong>?
           </p>
           {unsubCheck.errorMessage && (
             <p className="text-error text-sm">{unsubCheck.errorMessage}</p>
@@ -1026,7 +1026,7 @@ export default function Mail(): JSX.Element {
                 )
               }
             />
-            <span>Also move all emails to trash when marking unsubscribe done</span>
+            <span>При подтверждении отписки также переместить все письма в корзину</span>
           </label>
         </ActionModal>
       );
@@ -1035,7 +1035,7 @@ export default function Mail(): JSX.Element {
     if (!modal) return null;
 
     const { kind, vendor } = modal;
-    const name = vendor.name || vendor.root_domain || "Unknown";
+    const name = vendor.name || vendor.root_domain || "Неизвестно";
 
     // ---- Whitelist ----
     if (kind === "whitelist") {
@@ -1043,16 +1043,16 @@ export default function Mail(): JSX.Element {
       return (
         <ActionModal
           isOpen
-          title="Whitelist"
-          confirmLabel="Whitelist"
+          title="Белый список"
+          confirmLabel="Добавить"
           confirmVariant="primary"
           onConfirm={handleWhitelistConfirm}
           onCancel={closeModal}
           loading={actionLoading}
         >
           <p>
-            Whitelisted senders won't appear in this list. Choose what to
-            whitelist from <strong>{name}</strong>:
+            Отправители из белого списка не показываются здесь. Выберите, что
+            добавить в белый список для <strong>{name}</strong>:
           </p>
           <div className="space-y-2 mt-2">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -1068,7 +1068,7 @@ export default function Mail(): JSX.Element {
                 }
               />
               <span>
-                Entire domain{" "}
+                Весь домен{" "}
                 <span className="font-mono text-xs bg-base-300 px-1 rounded">
                   {vendor.root_domain}
                 </span>
@@ -1088,7 +1088,7 @@ export default function Mail(): JSX.Element {
                   }
                 />
                 <span>
-                  Specific sender{" "}
+                  Конкретный отправитель{" "}
                   <span className="font-mono text-xs bg-base-300 px-1 rounded">
                     {senderEmail}
                   </span>
@@ -1109,16 +1109,16 @@ export default function Mail(): JSX.Element {
         return (
           <ActionModal
             isOpen
-            title="Unsubscribe"
-            confirmLabel="Report as spam"
+            title="Отписка"
+            confirmLabel="Пометить как спам"
             confirmVariant="primary"
             onConfirm={handleSpamConfirm}
             onCancel={closeModal}
             loading={actionLoading}
           >
             <p>
-              No unsubscribe link was found for <strong>{name}</strong>. You can
-              report it as spam instead.
+              Ссылка для отписки от <strong>{name}</strong> не найдена. Вместо этого
+              можно пометить отправителя как спам.
             </p>
             {modalError && <p className="text-error text-sm mt-2">{modalError}</p>}
           </ActionModal>
@@ -1128,8 +1128,8 @@ export default function Mail(): JSX.Element {
       return (
         <ActionModal
           isOpen
-          title="Unsubscribe"
-          confirmLabel="Unsubscribe"
+          title="Отписка"
+          confirmLabel="Отписаться"
           confirmVariant="primary"
           onConfirm={handleUnsubscribeConfirm}
           onCancel={closeModal}
@@ -1145,15 +1145,15 @@ export default function Mail(): JSX.Element {
       return (
         <ActionModal
           isOpen
-          title="Report Spam"
-          confirmLabel="Report spam"
+          title="Пометить как спам"
+          confirmLabel="Пометить как спам"
           confirmVariant="primary"
           onConfirm={handleSpamConfirm}
           onCancel={closeModal}
           loading={actionLoading}
         >
           <p>
-            Are you sure you want to report <strong>{name}</strong> as spam?
+            Пометить <strong>{name}</strong> как спам?
           </p>
           {modalError && <p className="text-error text-sm mt-2">{modalError}</p>}
         </ActionModal>
@@ -1165,16 +1165,16 @@ export default function Mail(): JSX.Element {
       return (
         <ActionModal
           isOpen
-          title="Move to Trash"
-          confirmLabel="Move to trash"
+          title="Переместить в корзину"
+          confirmLabel="В корзину"
           confirmVariant="primary"
           onConfirm={handleTrashConfirm}
           onCancel={closeModal}
           loading={actionLoading}
         >
           <p>
-            Are you sure you want to move all {vendor.message_count} emails from{" "}
-            <strong>{name}</strong> to trash?
+            Переместить все письма ({vendor.message_count}) от{" "}
+            <strong>{name}</strong> в корзину?
           </p>
           {modalError && <p className="text-error text-sm mt-2">{modalError}</p>}
         </ActionModal>
@@ -1191,8 +1191,8 @@ export default function Mail(): JSX.Element {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Mailing lists</h1>
-        <p className="text-sm text-base-content/50 mt-1">Newsletters and promotional emails you can unsubscribe from. We unsubscribe automatically where possible, otherwise open the link for you.</p>
+        <h1 className="text-2xl font-bold">Рассылки</h1>
+        <p className="text-sm text-base-content/50 mt-1">Новостные и рекламные рассылки, от которых можно отписаться. Где возможно, отписываем автоматически, иначе открываем ссылку для отписки.</p>
       </div>
 
       {toast && (
@@ -1206,18 +1206,18 @@ export default function Mail(): JSX.Element {
       <div className="flex items-center gap-3">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Поиск..."
           className="input input-sm input-bordered w-48"
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
         />
         <span className="text-sm text-base-content/60 shrink-0">
-          {total.toLocaleString()} list{total !== 1 ? "s" : ""}
+          {total.toLocaleString()} {plural(total, "рассылка", "рассылки", "рассылок")}
         </span>
 
         {hasAnyFilter && (
           <button className="badge badge-sm badge-ghost cursor-pointer" onClick={handleClearAll}>
-            clear all
+            сбросить всё
           </button>
         )}
 
@@ -1272,27 +1272,27 @@ export default function Mail(): JSX.Element {
           {showFilters && (
             <div className="absolute right-0 top-full z-20 bg-base-200 rounded-xl shadow-lg mt-1 p-4 min-w-64 space-y-3">
               <FilterGroup
-                label="Volume"
+                label="Объём"
                 options={["oneoff", "low", "medium", "high"]}
-                labels={["One-off (≤5)", "Low (≤25)", "Medium (≤100)", "High (100+)"]}
+                labels={["Разово (≤5)", "Мало (≤25)", "Средне (≤100)", "Много (100+)"]}
                 value={volumeFilter}
                 onChange={v => { setVolumeFilter(v); setPage(1); }}
               />
               <FilterGroup
-                label="Activity"
+                label="Активность"
                 options={["active", "inactive", "stale"]}
-                labels={["Active (<1y)", "1-2 years ago", "2+ years ago"]}
+                labels={["Активна (<1 года)", "1–2 года назад", "2+ года назад"]}
                 colors={["secondary", "secondary", "secondary"]}
                 value={activityFilter}
                 onChange={v => { setActivityFilter(v); setPage(1); }}
               />
               <div className="pt-2 border-t border-base-content/10">
-                <div className="text-sm text-base-content/40 mb-1.5">Breach</div>
+                <div className="text-sm text-base-content/40 mb-1.5">Утечки</div>
                 <button
                   className={`badge badge-sm cursor-pointer ${breachedFilter ? "badge-warning" : "badge-soft badge-warning"}`}
                   onClick={() => { setBreachedFilter(v => !v); setPriorityFilter(false); setWhitelistedFilter(false); setPage(1); }}
                 >
-                  ⚠️ On breach list
+                  ⚠️ В базах утечек
                 </button>
               </div>
             </div>
@@ -1307,7 +1307,7 @@ export default function Mail(): JSX.Element {
           onClick={() => { const next = !whitelistedFilter; setWhitelistedFilter(next); setPriorityFilter(false); setBreachedFilter(false); setPage(1); setSelectedIds(new Set()); }}
         >
           <BadgeCheck className="w-3 h-3" />
-          Whitelisted
+          Белый список
         </button>
 
         <div className="w-px h-3 bg-base-content/20" />
@@ -1340,9 +1340,9 @@ export default function Mail(): JSX.Element {
       ) : vendors.length === 0 ? (
         <div className="card bg-base-200">
           <div className="card-body text-center">
-            <h2 className="card-title justify-center">All caught up!</h2>
+            <h2 className="card-title justify-center">Всё чисто!</h2>
             <p className="text-base-content/60">
-              {search ? "No lists match your search" : "No bulk email detected"}
+              {search ? "Нет рассылок, подходящих под поиск" : "Массовые рассылки не обнаружены"}
             </p>
           </div>
         </div>
@@ -1368,7 +1368,7 @@ export default function Mail(): JSX.Element {
               <div className="flex items-center gap-1">
                 <button
                   className="btn btn-ghost btn-sm btn-square tooltip text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 disabled:opacity-25"
-                  data-tip="Unsubscribe"
+                  data-tip="Отписаться"
                   disabled={selectedIds.size === 0}
                   onClick={() => openBatch("unsubscribe")}
                 >
@@ -1376,7 +1376,7 @@ export default function Mail(): JSX.Element {
                 </button>
                 <button
                   className="btn btn-ghost btn-sm btn-square tooltip text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 disabled:opacity-25"
-                  data-tip="Report spam"
+                  data-tip="Пометить как спам"
                   disabled={selectedIds.size === 0}
                   onClick={() => openBatch("spam")}
                 >
@@ -1384,7 +1384,7 @@ export default function Mail(): JSX.Element {
                 </button>
                 <button
                   className="btn btn-ghost btn-sm btn-square tooltip text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 disabled:opacity-25"
-                  data-tip="Move to trash"
+                  data-tip="В корзину"
                   disabled={selectedIds.size === 0}
                   onClick={() => openBatch("trash")}
                 >
@@ -1392,7 +1392,7 @@ export default function Mail(): JSX.Element {
                 </button>
                 {selectedIds.size > 0 && (
                   <span className="text-sm text-base-content/50 ml-1">
-                    {selectedIds.size} selected
+                    выбрано: {selectedIds.size}
                   </span>
                 )}
               </div>
@@ -1406,7 +1406,7 @@ export default function Mail(): JSX.Element {
               const isExpanded = expandedRows.has(vendor.id);
               const messages = messagesCache.get(vendor.id);
               const displayName =
-                vendor.name || vendor.root_domain || "Unknown";
+                vendor.name || vendor.root_domain || "Неизвестно";
 
               return (
                 <div
@@ -1439,7 +1439,7 @@ export default function Mail(): JSX.Element {
                           type="checkbox"
                           className="checkbox checkbox-sm"
                           disabled
-                          title="Requires manual unsubscribe"
+                          title="Нужна ручная отписка"
                         />
                       )}
 
@@ -1458,14 +1458,14 @@ export default function Mail(): JSX.Element {
                         {vendor.breachInfo && vendor.breachInfo.length > 0 && (
                           <span
                             className="shrink-0 leading-none"
-                            title={vendor.breachInfo.some(b => b.likelyAffected) ? "You likely had an account when a breach occurred" : "Domain appears on a known breach list"}
+                            title={vendor.breachInfo.some(b => b.likelyAffected) ? "Вероятно, у вас был аккаунт на момент утечки" : "Домен есть в базах утечек"}
                           >
                             {vendor.breachInfo.some(b => b.likelyAffected) ? "⚠️" : "ℹ️"}
                           </span>
                         )}
                         <span
                           className="badge badge-sm badge-soft badge-neutral text-base-content/60 shrink-0 tabular-nums"
-                          title="Emails"
+                          title="Письма"
                         >
                           {vendor.message_count}
                         </span>
@@ -1480,32 +1480,32 @@ export default function Mail(): JSX.Element {
                           <button
                             className="btn btn-outline btn-xs text-base-content/50 hover:border-base-content/80 hover:text-base-content/80"
                             onClick={(e) => handleWhitelistClick(e, vendor)}
-                            aria-label="Whitelist"
+                            aria-label="В белый список"
                           >
-                            Whitelist
+                            В белый список
                           </button>
                         )}
                         <button
                           className="btn btn-ghost btn-sm btn-square tooltip tooltip-top text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80"
-                          data-tip="Unsubscribe"
+                          data-tip="Отписаться"
                           onClick={(e) => handleUnsubscribeClick(e, vendor)}
-                          aria-label="Unsubscribe"
+                          aria-label="Отписаться"
                         >
                           <BellOff className="w-4 h-4" strokeWidth={1.5} />
                         </button>
                         <button
                           className="btn btn-ghost btn-sm btn-square tooltip tooltip-top text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80"
-                          data-tip="Report spam"
+                          data-tip="Пометить как спам"
                           onClick={(e) => handleSpamClick(e, vendor)}
-                          aria-label="Report spam"
+                          aria-label="Пометить как спам"
                         >
                           <Flag className="w-4 h-4" strokeWidth={1.5} />
                         </button>
                         <button
                           className="btn btn-ghost btn-sm btn-square tooltip tooltip-top text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80"
-                          data-tip="Move to trash"
+                          data-tip="В корзину"
                           onClick={(e) => handleTrashClick(e, vendor)}
-                          aria-label="Move to trash"
+                          aria-label="В корзину"
                         >
                           <Trash2 className="w-4 h-4" strokeWidth={1.5} />
                         </button>
@@ -1531,7 +1531,7 @@ export default function Mail(): JSX.Element {
                             navigate(`/accounts/${encodeURIComponent(groupKey)}`);
                           }}
                         >
-                          View details
+                          Подробнее
                           <ChevronRight className="w-3 h-3" strokeWidth={2} />
                         </button>
                       </div>
@@ -1541,7 +1541,7 @@ export default function Mail(): JSX.Element {
                         </div>
                       ) : messages.length === 0 ? (
                         <div className="p-4 text-center text-base-content/50">
-                          No messages found
+                          Писем не найдено
                         </div>
                       ) : (
                         <div className="divide-y divide-base-300">
@@ -1554,7 +1554,7 @@ export default function Mail(): JSX.Element {
                                 {formatRelativeDate(msg.date)}
                               </span>
                               <span className="text-sm truncate">
-                                {msg.subject ?? "(No subject)"}
+                                {msg.subject ?? "(Без темы)"}
                               </span>
                             </div>
                           ))}

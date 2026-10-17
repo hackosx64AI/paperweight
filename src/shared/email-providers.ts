@@ -25,7 +25,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     smtp: { host: "127.0.0.1", port: 1025, tls: false },
     allowSelfSigned: true,
     supportUrl: "https://proton.me/support/bridge",
-    notes: "Proton Bridge must be installed and running. Check your Bridge app as ports might differ.",
+    notes: "Proton Bridge должен быть установлен и запущен. Сверьте порты в приложении Bridge — они могут отличаться.",
   },
   {
     id: "yahoo",
@@ -57,7 +57,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     imap: { host: "imap.zoho.com", port: 993, tls: true },
     smtp: { host: "smtp.zoho.com", port: 465, tls: true },
     supportUrl: "https://www.zoho.com/mail/help/imap-access.html",
-    notes: "You may need to enable IMAP access in Zoho Mail settings before connecting. You may also need to create an app-specific password (if 2FA is enabled).",
+    notes: "Возможно, перед подключением нужно включить доступ по IMAP в настройках Zoho Mail. Также может понадобиться пароль приложения (если включена 2FA).",
   },
   {
     id: "mailbox",
@@ -79,7 +79,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     imap: { host: "imap.gmx.com", port: 993, tls: true },
     smtp: { host: "mail.gmx.com", port: 587, tls: false },
     supportUrl: "https://support.gmx.com/pop-imap/imap/server.html",
-    notes: "You may need to enable IMAP access in GMX web settings before connecting.",
+    notes: "Возможно, перед подключением нужно включить доступ по IMAP в веб-настройках GMX.",
   },
 ];
 

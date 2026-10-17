@@ -47,7 +47,7 @@ export async function executeRfc8058Unsubscribe(
 ): Promise<{ success: boolean; error?: string }> {
   requirePro();
   if (!url.startsWith("https://")) {
-    return { success: false, error: "One-click unsubscribe requires HTTPS." };
+    return { success: false, error: "Отписка в один клик требует HTTPS." };
   }
   try {
     const response = await fetch(url, {
@@ -97,7 +97,7 @@ export async function unsubscribeVendor(vendorId: number): Promise<UnsubscribeRe
 
   const { to, subject, body } = parseMailto(entry.url);
   if (!to.includes("@")) {
-    return { status: "failed", method: "email", error: "Invalid unsubscribe email address." };
+    return { status: "failed", method: "email", error: "Некорректный адрес для отписки." };
   }
 
   const sent = await sendEmail(to, subject, body || PAPERWEIGHT_UNSUB_BODY);

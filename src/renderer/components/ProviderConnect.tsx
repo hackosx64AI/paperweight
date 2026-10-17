@@ -39,7 +39,7 @@ function OAuthSelectRow({
       <button
         className="btn btn-outline join-item btn-square"
         onClick={() => onConnect(true)}
-        title="Copy sign-in link instead of opening a browser"
+        title="Скопировать ссылку для входа вместо открытия браузера"
         aria-label={copyAriaLabel}
       >
         <Copy className="w-4 h-4" />
@@ -65,15 +65,15 @@ export function ProviderSelect({
     <div className="space-y-4">
       <OAuthSelectRow
         logo={<GoogleLogo />}
-        label="Connect with Google"
-        copyAriaLabel="Copy Google sign-in link"
+        label="Войти через Google"
+        copyAriaLabel="Скопировать ссылку для входа Google"
         onConnect={onGmail}
       />
 
       <OAuthSelectRow
         logo={<MicrosoftLogo />}
-        label="Connect with Microsoft"
-        copyAriaLabel="Copy Microsoft sign-in link"
+        label="Войти через Microsoft"
+        copyAriaLabel="Скопировать ссылку для входа Microsoft"
         onConnect={onMicrosoft}
       />
 
@@ -82,7 +82,7 @@ export function ProviderSelect({
         onClick={onApple}
       >
         <AppleLogo />
-        Connect with Apple
+        Войти через Apple
       </button>
 
       <button
@@ -90,17 +90,17 @@ export function ProviderSelect({
         onClick={onProton}
       >
         <ProtonLogo />
-        Connect with Proton Mail
+        Войти через Proton Mail
       </button>
 
-      <div className="divider">OR</div>
+      <div className="divider">ИЛИ</div>
 
       <button
         className="btn btn-ghost btn-block justify-start gap-3"
         onClick={onImap}
       >
         <Mail className="w-5 h-5" aria-hidden="true" />
-        Other email (IMAP)
+        Другая почта (IMAP)
       </button>
     </div>
   );
@@ -163,7 +163,7 @@ function OAuthConnect({
       window.api.startSync();
       setTimeout(onSuccess, 1000);
     } else {
-      setError(result.error || "Authorization failed");
+      setError(result.error || "Ошибка авторизации");
       setStep("error");
     }
   };
@@ -191,17 +191,17 @@ function OAuthConnect({
           <div className="text-center mt-2">
             {copied ? (
               <>
-                <p className="text-sm">Sign-in link copied</p>
+                <p className="text-sm">Ссылка для входа скопирована</p>
                 <p className="text-xs text-base-content/50 mt-1">
-                  Paste it into the browser profile signed in to the account you
-                  want to connect, then complete sign-in.
+                  Вставьте её в профиль браузера, где выполнен вход в нужный
+                  аккаунт, и завершите вход.
                 </p>
               </>
             ) : (
               <>
-                <p className="text-sm">Complete sign-in in your browser...</p>
+                <p className="text-sm">Завершите вход в браузере...</p>
                 <p className="text-xs text-base-content/50 mt-1">
-                  Waiting for {providerName} authorization
+                  Ожидание авторизации {providerName}
                 </p>
               </>
             )}
@@ -219,14 +219,14 @@ function OAuthConnect({
               ) : (
                 <Copy className="w-4 h-4" />
               )}
-              {copied ? "Copied" : "Copy link"}
+              {copied ? "Скопировано" : "Копировать ссылку"}
             </button>
             <button
               className="btn btn-outline btn-sm flex-1"
               onClick={() => authUrl && window.api.openExternal(authUrl)}
               disabled={!authUrl}
             >
-              Open in browser
+              Открыть в браузере
             </button>
           </div>
 
@@ -237,7 +237,7 @@ function OAuthConnect({
               onBack();
             }}
           >
-            Cancel
+            Отмена
           </button>
         </div>
       )}
@@ -247,9 +247,9 @@ function OAuthConnect({
           <div className="text-success">
             <CheckCircle2 className="w-12 h-12" aria-hidden="true" />
           </div>
-          <p className="text-sm font-medium">Connected successfully!</p>
+          <p className="text-sm font-medium">Подключено!</p>
           <p className="text-xs text-base-content/50">
-            Starting initial sync...
+            Запуск первой синхронизации...
           </p>
         </div>
       )}
@@ -264,10 +264,10 @@ function OAuthConnect({
               className="btn btn-outline flex-1"
               onClick={() => handleConnect(true)}
             >
-              Try Again
+              Повторить
             </button>
             <button className="btn btn-ghost flex-1" onClick={onBack}>
-              Back
+              Назад
             </button>
           </div>
         </div>
@@ -352,7 +352,7 @@ export function ServerRow({
         <input
           type="text"
           className="input input-bordered input-sm flex-1 min-w-0"
-          placeholder="Host"
+          placeholder="Хост"
           value={host}
           onChange={(e) => onHost(e.target.value)}
           required
@@ -360,14 +360,14 @@ export function ServerRow({
         <input
           type="number"
           className="input input-bordered input-sm w-20"
-          placeholder="Port"
+          placeholder="Порт"
           value={port}
           onChange={(e) => onPort(parseInt(e.target.value, 10))}
           required
         />
         <label
           className="flex items-center gap-1.5 cursor-pointer select-none shrink-0"
-          title="Implicit TLS"
+          title="Неявный TLS"
         >
           <input
             type="checkbox"
@@ -423,7 +423,7 @@ export function AppleConnect({
       window.api.startSync();
       onSuccess();
     } else {
-      setError(result.error || "Connection failed");
+      setError(result.error || "Не удалось подключиться");
     }
   };
 
@@ -435,8 +435,8 @@ export function AppleConnect({
         </svg>
         <div>
           <p>
-            iCloud Mail requires third-party email access to connect over IMAP.
-            This requires an app-specific password.{" "}
+            Для подключения iCloud Mail по IMAP нужен доступ сторонних почтовых
+            программ и пароль приложения.{" "}
             {preset.supportUrl && (
               <a
                 href={preset.supportUrl}
@@ -444,7 +444,7 @@ export function AppleConnect({
                 rel="noopener noreferrer"
                 className="link"
               >
-                Read more
+                Подробнее
               </a>
             )}
           </p>
@@ -456,9 +456,9 @@ export function AppleConnect({
                 rel="noopener noreferrer"
                 className="link"
               >
-                Sign in to your Apple Account
+                Войдите в Apple Account
               </a>
-              {" > "} Sign-In and Security &gt; to generate one.
+              {" > "} «Вход и безопасность» &gt; и создайте пароль.
             </p>
           )}
         </div>
@@ -466,7 +466,7 @@ export function AppleConnect({
 
       <details className="collapse collapse-arrow border border-base-300 rounded-lg">
         <summary className="collapse-title text-xs font-medium py-2 min-h-0">
-          Server Settings
+          Настройки сервера
         </summary>
         <div className="collapse-content space-y-3 pb-3">
           <ServerRow
@@ -491,7 +491,7 @@ export function AppleConnect({
       </details>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Apple ID Email</label>
+        <label className="text-sm font-medium">Email Apple ID</label>
         <input
           type="text"
           className="input input-bordered w-full"
@@ -503,7 +503,7 @@ export function AppleConnect({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">App-Specific Password</label>
+        <label className="text-sm font-medium">Пароль приложения</label>
         <input
           type="password"
           className="input input-bordered w-full"
@@ -526,10 +526,10 @@ export function AppleConnect({
           className="btn btn-primary flex-1"
           disabled={loading}
         >
-          {loading ? <><span className="loading loading-spinner loading-xs" /> Connecting...</> : "Connect"}
+          {loading ? <><span className="loading loading-spinner loading-xs" /> Подключение...</> : "Подключить"}
         </button>
         <button type="button" className="btn btn-ghost flex-1" onClick={onBack}>
-          Back
+          Назад
         </button>
       </div>
     </form>
@@ -577,7 +577,7 @@ export function ProtonConnect({
       window.api.startSync();
       onSuccess();
     } else {
-      setError(result.error || "Connection failed");
+      setError(result.error || "Не удалось подключиться");
     }
   };
 
@@ -589,7 +589,7 @@ export function ProtonConnect({
         </svg>
         <div>
           <p>
-            Proton Mail connects over IMAP via{" "}
+            Proton Mail подключается по IMAP через{" "}
             {preset.supportUrl ? (
               <a
                 href={preset.supportUrl}
@@ -602,14 +602,14 @@ export function ProtonConnect({
             ) : (
               "Proton Bridge"
             )}
-            , which must be running to sync.
+            — он должен быть запущен во время синхронизации.
           </p>
         </div>
       </div>
 
       <details className="collapse collapse-arrow border border-base-300 rounded-lg">
         <summary className="collapse-title text-xs font-medium py-2 min-h-0">
-          Server Settings
+          Настройки сервера
         </summary>
         <div className="collapse-content space-y-3 pb-3">
           <ServerRow
@@ -634,7 +634,7 @@ export function ProtonConnect({
       </details>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Proton Email</label>
+        <label className="text-sm font-medium">Email Proton</label>
         <input
           type="text"
           className="input input-bordered w-full"
@@ -646,7 +646,7 @@ export function ProtonConnect({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Bridge Password</label>
+        <label className="text-sm font-medium">Пароль Bridge</label>
         <input
           type="password"
           className="input input-bordered w-full"
@@ -668,10 +668,10 @@ export function ProtonConnect({
           className="btn btn-primary flex-1"
           disabled={loading}
         >
-          {loading ? <><span className="loading loading-spinner loading-xs" /> Connecting...</> : "Connect"}
+          {loading ? <><span className="loading loading-spinner loading-xs" /> Подключение...</> : "Подключить"}
         </button>
         <button type="button" className="btn btn-ghost flex-1" onClick={onBack}>
-          Back
+          Назад
         </button>
       </div>
     </form>
@@ -774,20 +774,20 @@ export function ImapConnect({
       window.api.startSync();
       onSuccess();
     } else {
-      setError(result.error || "Connection failed");
+      setError(result.error || "Не удалось подключиться");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Provider</label>
+        <label className="text-sm font-medium">Провайдер</label>
         <select
           className="select select-bordered w-full"
           value={presetId}
           onChange={(e) => applyPreset(e.target.value)}
         >
-          <option value="custom">Custom / Other</option>
+          <option value="custom">Свой / другой</option>
           {PROVIDER_PRESETS.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -804,7 +804,7 @@ export function ImapConnect({
           <div>
             {preset.appSpecificPasswordUrl && (
               <p>
-                {preset.name} requires an app-specific password for third-party email access.{" "}
+                {preset.name} требует пароль приложения для доступа сторонних почтовых программ.{" "}
                 {preset.supportUrl && (
                   <a
                     href={preset.supportUrl}
@@ -812,7 +812,7 @@ export function ImapConnect({
                     rel="noopener noreferrer"
                     className="link"
                   >
-                    Read more
+                    Подробнее
                   </a>
                 )}
               </p>
@@ -825,7 +825,7 @@ export function ImapConnect({
                   rel="noopener noreferrer"
                   className="link"
                 >
-                  {preset.name} setup guide
+                  Инструкция по настройке {preset.name}
                 </a>
               </p>
             )}
@@ -837,7 +837,7 @@ export function ImapConnect({
                   rel="noopener noreferrer"
                   className="link"
                 >
-                  Generate an app-specific password
+                  Создать пароль приложения
                 </a>
               </p>
             )}
@@ -865,7 +865,7 @@ export function ImapConnect({
           checked={allowSelfSigned}
           onChange={(e) => updateAllowSelfSigned(e.target.checked)}
         />
-        <span className="text-xs">Allow self-signed certificate</span>
+        <span className="text-xs">Разрешить самоподписанный сертификат</span>
       </label>
 
       <ServerRow
@@ -879,7 +879,7 @@ export function ImapConnect({
       />
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Email / Username</label>
+        <label className="text-sm font-medium">Email / логин</label>
         <input
           type="text"
           className="input input-bordered w-full"
@@ -890,7 +890,7 @@ export function ImapConnect({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Password</label>
+        <label className="text-sm font-medium">Пароль</label>
         <input
           type="password"
           className="input input-bordered w-full"
@@ -912,10 +912,10 @@ export function ImapConnect({
           className="btn btn-primary flex-1"
           disabled={loading}
         >
-          {loading ? <><span className="loading loading-spinner loading-xs" /> Connecting...</> : "Connect"}
+          {loading ? <><span className="loading loading-spinner loading-xs" /> Подключение...</> : "Подключить"}
         </button>
         <button type="button" className="btn btn-ghost flex-1" onClick={onBack}>
-          Back
+          Назад
         </button>
       </div>
     </form>

@@ -16,7 +16,7 @@ export default function HelpSection({
           )
         }
       >
-        Report an issue on GitHub
+        Сообщить о проблеме на GitHub
       </button>
       <button
         className="link link-primary w-fit"
@@ -24,7 +24,7 @@ export default function HelpSection({
           window.api.openExternal("mailto:hello@paperweight.email")
         }
       >
-        Contact hello@paperweight.email
+        Написать на hello@paperweight.email
       </button>
     </div>
   );
@@ -32,7 +32,7 @@ export default function HelpSection({
   if (variant === "plain") {
     return (
       <div className="space-y-3">
-        <h3 className="font-semibold">Help</h3>
+        <h3 className="font-semibold">Помощь</h3>
         {links}
       </div>
     );
@@ -41,7 +41,7 @@ export default function HelpSection({
   return (
     <div className="card bg-base-200">
       <div className="card-body space-y-3">
-        <h3 className="font-semibold">Help</h3>
+        <h3 className="font-semibold">Помощь</h3>
         {links}
       </div>
     </div>

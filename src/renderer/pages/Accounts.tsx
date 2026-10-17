@@ -8,6 +8,7 @@ import { BadgeCheck, ChevronRight, ChevronLeft, ArrowUpDown, SlidersHorizontal, 
 import { getActivitySignal, ACTIVITY_BADGE } from "../utils/signals";
 import ActionModal from "../components/ActionModal";
 import FilterGroup from "../components/FilterGroup";
+import { plural } from "@shared/formatting";
 
 const RISK_BORDER: Record<string, string> = {
   high: "border-error",
@@ -20,11 +21,11 @@ const CATEGORY_OPTIONS = Object.keys(RISK_CATEGORIES) as Array<keyof typeof RISK
 const CATEGORY_LABELS = CATEGORY_OPTIONS.map((c) => `${RISK_CATEGORIES[c].icon} ${RISK_CATEGORIES[c].label}`);
 
 const SORT_OPTIONS = [
-  { value: "risk", label: "Risk" },
-  { value: "message_count", label: "Most emails" },
-  { value: "last_seen", label: "Latest" },
-  { value: "last_seen_asc", label: "Oldest" },
-  { value: "name", label: "Name" },
+  { value: "risk", label: "По риску" },
+  { value: "message_count", label: "Больше писем" },
+  { value: "last_seen", label: "Сначала новые" },
+  { value: "last_seen_asc", label: "Сначала старые" },
+  { value: "name", label: "По названию" },
 ];
 
 interface Preset {
@@ -39,14 +40,14 @@ interface Preset {
 }
 
 const DISCOVERY_PRESETS: Preset[] = [
-  { id: "highrisk", label: "High risk", risk: "high" },
-  { id: "onetime", label: "Single orders", dataType: "has_orders", volume: "oneoff" },
-  { id: "breached", label: "Breached", breached: true, defaultSort: "risk" },
+  { id: "highrisk", label: "Высокий риск", risk: "high" },
+  { id: "onetime", label: "Разовые заказы", dataType: "has_orders", volume: "oneoff" },
+  { id: "breached", label: "Утечки", breached: true, defaultSort: "risk" },
 ];
 
 const HISTORY_PRESETS: Preset[] = [
-  { id: "oldaccounts", label: "Old accounts", risk: "high", activity: "stale" },
-  { id: "oldorders", label: "Old orders", dataType: "has_orders", activity: "stale" },
+  { id: "oldaccounts", label: "Старые аккаунты", risk: "high", activity: "stale" },
+  { id: "oldorders", label: "Старые заказы", dataType: "has_orders", activity: "stale" },
 ];
 
 type AccountModal =
@@ -280,27 +281,27 @@ export default function Accounts(): JSX.Element {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Accounts</h1>
-        <p className="text-sm text-base-content/50 mt-1">Companies that likely hold your personal data, like orders, accounts, invoices, and more. Risk is based on data type and breach history.</p>
+        <h1 className="text-2xl font-bold">Аккаунты</h1>
+        <p className="text-sm text-base-content/50 mt-1">Компании, у которых, вероятно, есть ваши личные данные: заказы, аккаунты, счета и прочее. Риск оценивается по типу данных и истории утечек.</p>
       </div>
 
       {/* Row 1 — toolbar */}
       <div className="flex items-center gap-3">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Поиск..."
           className="input input-sm input-bordered w-48"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
 
         <span className="text-sm text-base-content/60 shrink-0">
-          {total} {total !== 1 ? "companies" : "company"}
+          {total} {plural(total, "компания", "компании", "компаний")}
         </span>
 
         {hasAnyFilter && (
           <button className="badge badge-sm badge-ghost cursor-pointer" onClick={clearAll}>
-            clear all
+            сбросить всё
           </button>
         )}
 
@@ -354,56 +355,56 @@ export default function Accounts(): JSX.Element {
           {showFilters && (
             <div className="absolute right-0 top-full z-20 bg-base-200 rounded-xl shadow-lg mt-1 p-4 min-w-64 space-y-3">
               <FilterGroup
-                label="Risk"
+                label="Риск"
                 options={["high", "medium", "low"]}
-                labels={["High", "Medium", "Low"]}
+                labels={["Высокий", "Средний", "Низкий"]}
                 colors={["error", "warning", "success"]}
                 value={riskFilter}
                 onChange={v => { setRiskFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <FilterGroup
-                label="Type"
+                label="Тип"
                 options={["has_orders"]}
-                labels={["Orders"]}
+                labels={["Заказы"]}
                 value={dataTypeFilter}
                 onChange={v => { setDataTypeFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <FilterGroup
-                label="Activity"
+                label="Активность"
                 options={["recent", "active", "inactive", "stale", "dead"]}
-                labels={["Recent (<3m)", "Active (<1y)", "1-2 years ago", "2+ years ago", "5+ years ago"]}
+                labels={["Недавно (<3 мес)", "Активен (<1 года)", "1–2 года назад", "2+ года назад", "5+ лет назад"]}
                 colors={["secondary", "secondary", "secondary", "secondary", "secondary"]}
                 value={activityFilter}
                 onChange={v => { setActivityFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <FilterGroup
-                label="Volume"
+                label="Объём"
                 options={["oneoff", "low", "medium", "high"]}
-                labels={["One-off (≤5)", "Low (≤25)", "Medium (≤100)", "High (100+)"]}
+                labels={["Разово (≤5)", "Мало (≤25)", "Средне (≤100)", "Много (100+)"]}
                 value={volumeFilter}
                 onChange={v => { setVolumeFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <FilterGroup
-                label="Category"
+                label="Категория"
                 options={CATEGORY_OPTIONS}
                 labels={CATEGORY_LABELS}
                 value={categoryFilter}
                 onChange={v => { setCategoryFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <FilterGroup
-                label="Found in your emails"
+                label="Найдено в письмах"
                 options={PII_TYPES}
                 labels={PII_TYPES.map(t => PII_LABELS[t])}
                 value={piiTypeFilter}
                 onChange={v => { setPiiTypeFilter(v); setShowReviewed(false); setPage(1); }}
               />
               <div className="pt-2 border-t border-base-content/10">
-                <div className="text-sm text-base-content/40 mb-1.5">Breach</div>
+                <div className="text-sm text-base-content/40 mb-1.5">Утечки</div>
                 <button
                   className={`badge badge-sm cursor-pointer ${anyBreachFilter ? "badge-warning" : "badge-soft badge-warning"}`}
                   onClick={() => { setAnyBreachFilter(v => !v); setShowReviewed(false); setPage(1); }}
                 >
-                  ⚠️ On breach list
+                  ⚠️ В базах утечек
                 </button>
               </div>
             </div>
@@ -418,7 +419,7 @@ export default function Accounts(): JSX.Element {
           onClick={toggleReviewed}
         >
           <BadgeCheck className="w-3 h-3" />
-          Reviewed
+          Проверенные
         </button>
 
         <div className="w-px h-3 bg-base-content/20" />
@@ -442,13 +443,13 @@ export default function Accounts(): JSX.Element {
       ) : vendors.length === 0 ? (
         <div className="card bg-base-200">
           <div className="card-body text-center">
-            <h2 className="card-title justify-center">No accounts found</h2>
+            <h2 className="card-title justify-center">Аккаунты не найдены</h2>
             <p className="text-base-content/60 mx-auto">
               {activityFilter === "dead"
-                ? "No accounts found for this time range. Sync to discover older accounts."
+                ? "За этот период аккаунты не найдены. Синхронизируйте, чтобы найти более старые."
                 : search
-                  ? "No accounts match your search"
-                  : "Adjust your filters or sync to see more"}
+                  ? "Нет аккаунтов, подходящих под поиск"
+                  : "Измените фильтры или синхронизируйте, чтобы увидеть больше"}
             </p>
           </div>
         </div>
@@ -456,7 +457,7 @@ export default function Accounts(): JSX.Element {
         <>
           <div className="space-y-2">
             {vendors.map((vendor) => {
-              const displayName = vendor.name || vendor.root_domain || "Unknown";
+              const displayName = vendor.name || vendor.root_domain || "Неизвестно";
               const computedRisk = vendor.risk_level ?? "unknown";
               const groupKey = vendor.root_domain ?? vendor.company_slug ?? String(vendor.id);
               const activitySignal = getActivitySignal(vendor.last_seen);
@@ -488,31 +489,31 @@ export default function Accounts(): JSX.Element {
                           <BadgeCheck
                             className="w-4 h-4 text-info shrink-0"
                             strokeWidth={2}
-                            aria-label="Verified company"
+                            aria-label="Проверенная компания"
                           />
                         )}
                         <span
                           className="badge badge-sm badge-soft badge-neutral text-base-content/60 shrink-0 tabular-nums"
-                          title="Emails"
+                          title="Письма"
                         >
                           {vendor.message_count}
                         </span>
                         {vendor.hasNotablePii && (
                           <span
                             className="shrink-0 leading-none"
-                            title="Personal data found in these emails"
+                            title="В этих письмах найдены личные данные"
                           >
                             <IdCard
                               className="w-4 h-4 text-base-content/50"
                               strokeWidth={2}
-                              aria-label="Personal data found in emails"
+                              aria-label="В письмах найдены личные данные"
                             />
                           </span>
                         )}
                         {vendor.breachInfo && vendor.breachInfo.length > 0 && (
                           <span
                             className="shrink-0 leading-none"
-                            title={vendor.breachInfo.some(b => b.likelyAffected) ? "You likely had an account when a breach occurred" : "Breach occurred, but your data may not be affected"}
+                            title={vendor.breachInfo.some(b => b.likelyAffected) ? "Вероятно, у вас был аккаунт на момент утечки" : "Утечка была, но ваши данные могли не пострадать"}
                           >
                             {vendor.breachInfo.some(b => b.likelyAffected) ? "⚠️" : "ℹ️"}
                           </span>
@@ -527,17 +528,17 @@ export default function Accounts(): JSX.Element {
                           <button
                             className="btn btn-outline btn-xs text-base-content/50 hover:border-base-content/80 hover:text-base-content/80"
                             onClick={(e) => handleWhitelistClick(e, vendor)}
-                            aria-label="Whitelist"
+                            aria-label="В белый список"
                           >
-                            Whitelist
+                            В белый список
                           </button>
                         )}
                         <button
                           className={`btn btn-ghost btn-sm btn-square tooltip tooltip-top text-base-content/50 hover:bg-base-content/10 hover:text-base-content/80 ${vendor.status === "reviewed" ? "text-success" : ""
                             }`}
-                          data-tip={vendor.status === "reviewed" ? "Undo review" : "Mark reviewed"}
+                          data-tip={vendor.status === "reviewed" ? "Снять отметку" : "Отметить проверенным"}
                           onClick={(e) => handleReviewedClick(e, vendor)}
-                          aria-label="Mark reviewed"
+                          aria-label="Отметить проверенным"
                         >
                           <Check className="w-4 h-4" strokeWidth={1.5} />
                         </button>
@@ -550,13 +551,13 @@ export default function Accounts(): JSX.Element {
                           </span>
                         )}
                         {vendor.has_orders && (
-                          <span className="badge badge-xs badge-soft">Orders</span>
+                          <span className="badge badge-xs badge-soft">Заказы</span>
                         )}
                         {vendor.has_account && !vendor.has_orders && (
-                          <span className="badge badge-xs badge-soft">Account</span>
+                          <span className="badge badge-xs badge-soft">Аккаунт</span>
                         )}
                         {vendor.has_marketing && !vendor.has_account && (
-                          <span className="badge badge-xs badge-soft">Marketing</span>
+                          <span className="badge badge-xs badge-soft">Маркетинг</span>
                         )}
                       </div>
                       <ChevronRight
@@ -596,15 +597,15 @@ export default function Accounts(): JSX.Element {
       {modal?.kind === "whitelist" && (
         <ActionModal
           isOpen
-          title="Whitelist"
-          confirmLabel="Whitelist"
+          title="Белый список"
+          confirmLabel="Добавить"
           confirmVariant="primary"
           onConfirm={handleWhitelistConfirm}
           onCancel={() => setModal(null)}
           loading={actionLoading}
         >
           <p>
-            Whitelisted senders won't appear in Accounts or Mailing lists. Whitelist entire domain{" "}
+            Отправители из белого списка не показываются в «Аккаунтах» и «Рассылках». Добавить в белый список весь домен{" "}
             <span className="font-mono text-xs bg-base-300 px-1 rounded">
               {modal.vendor.root_domain}
             </span>
@@ -616,8 +617,8 @@ export default function Accounts(): JSX.Element {
       {modal?.kind === "reviewed" && (
         <ActionModal
           isOpen
-          title={modal.vendor.status === "reviewed" ? "Undo review" : "Mark as reviewed"}
-          confirmLabel={modal.vendor.status === "reviewed" ? "Undo" : "Mark reviewed"}
+          title={modal.vendor.status === "reviewed" ? "Снять отметку" : "Отметить как проверенный"}
+          confirmLabel={modal.vendor.status === "reviewed" ? "Снять" : "Отметить"}
           confirmVariant="primary"
           onConfirm={handleReviewedConfirm}
           onCancel={() => setModal(null)}
@@ -625,8 +626,8 @@ export default function Accounts(): JSX.Element {
         >
           <p>
             {modal.vendor.status === "reviewed"
-              ? `Remove the reviewed flag from ${modal.vendor.name || modal.vendor.root_domain}?`
-              : `Mark ${modal.vendor.name || modal.vendor.root_domain} as reviewed? You can still view reviewed accounts using the Reviewed filter.`}
+              ? `Снять отметку «проверено» с ${modal.vendor.name || modal.vendor.root_domain}?`
+              : `Отметить ${modal.vendor.name || modal.vendor.root_domain} как проверенный? Проверенные аккаунты по-прежнему доступны через фильтр «Проверенные».`}
           </p>
         </ActionModal>
       )}

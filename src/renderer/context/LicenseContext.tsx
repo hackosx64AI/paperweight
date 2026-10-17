@@ -7,9 +7,9 @@ import ActionModal from "../components/ActionModal";
 
 const PRICING_URL = `${APP_CONFIG.WEBSITE}/pricing`;
 
-export const PRO_UPGRADE_HEADLINE = "Clean up what you've found";
+export const PRO_UPGRADE_HEADLINE = "Наведите порядок в найденном";
 export const PRO_UPGRADE_BODY =
-  "Paperweight Free gives you the full picture. Pro lets you act on it: unsubscribe, remove unwanted mail, send privacy requests, use multiple accounts, and connect MCP agents.";
+  "Бесплатная версия Paperweight показывает полную картину. Pro позволяет действовать: отписываться, удалять ненужную почту, отправлять запросы о персональных данных, подключать несколько аккаунтов и MCP-агентов.";
 
 interface LicenseContextValue {
   license: LicenseStatus;
@@ -78,9 +78,9 @@ export function LicenseProvider({
       <ActionModal
         isOpen={blocked}
         title={PRO_UPGRADE_HEADLINE}
-        confirmLabel="Upgrade to Pro"
+        confirmLabel="Перейти на Pro"
         confirmVariant="primary"
-        cancelLabel="Maybe later"
+        cancelLabel="Может быть, позже"
         cancelVariant="neutral"
         onConfirm={() => {
           setBlocked(false);

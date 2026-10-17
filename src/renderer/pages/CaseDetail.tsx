@@ -125,8 +125,8 @@ function buildCommunicationTimeline(
 }
 
 const BADGE_LABELS: Record<NonNullable<CommunicationItem["badge"]>, string> = {
-  sent: "Sent",
-  case: "Case",
+  sent: "Отправлено",
+  case: "Обращение",
 };
 
 interface CommunicationRowProps {
@@ -161,7 +161,7 @@ function CommunicationRow({ item, caseActive, linkLoading, onToggleLink }: Commu
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-2">
             {item.isNew && (
-              <span className="badge badge-xs badge-error shrink-0">New</span>
+              <span className="badge badge-xs badge-error shrink-0">Новое</span>
             )}
             {item.badge && (
               <span
@@ -198,7 +198,7 @@ function CommunicationRow({ item, caseActive, linkLoading, onToggleLink }: Commu
                 disabled={linkLoading}
                 onClick={() => onToggleLink(item.messageId!, true)}
               >
-                Add to case
+                Добавить в обращение
               </button>
             )}
             {canLink && item.manuallyLinked && (
@@ -208,7 +208,7 @@ function CommunicationRow({ item, caseActive, linkLoading, onToggleLink }: Commu
                 disabled={linkLoading}
                 onClick={() => onToggleLink(item.messageId!, false)}
               >
-                Remove from case
+                Убрать из обращения
               </button>
             )}
           </div>
@@ -229,10 +229,10 @@ function Timeline({
   const progress = Math.min(100, (days / ESCALATE_AFTER_DAYS) * 100);
   const highlightDay = nextAction ? NEXT_ACTION_DAY[nextAction] : undefined;
   const marks = [
-    { day: 0, label: "Sent" },
-    { day: REMINDER_AFTER_DAYS, label: "Reminder" },
-    { day: FOLLOWUP_AFTER_DAYS, label: "Deadline" },
-    { day: ESCALATE_AFTER_DAYS, label: "Escalate" },
+    { day: 0, label: "Отправлено" },
+    { day: REMINDER_AFTER_DAYS, label: "Напоминание" },
+    { day: FOLLOWUP_AFTER_DAYS, label: "Срок" },
+    { day: ESCALATE_AFTER_DAYS, label: "Жалоба" },
   ];
 
   return (
@@ -282,20 +282,20 @@ function Timeline({
         </div>
         <details className="collapse collapse-arrow bg-base-100 rounded-box">
           <summary className="collapse-title text-xs font-medium py-2 min-h-0">
-            Case opened {formatAbsoluteDate(openedAt)}, {Math.max(0, Math.floor(days))} days ago
+            Обращение открыто {formatAbsoluteDate(openedAt)}, дней назад: {Math.max(0, Math.floor(days))}
           </summary>
           <div className="collapse-content text-xs text-base-content/60 space-y-2 pb-3">
             <p>
-              Companies have 30 days to respond, extendable to 60 days for complex
-              requests, but they must notify you if extending.
+              У компаний есть 30 дней на ответ; для сложных запросов срок можно продлить
+              до 60 дней, но о продлении вас обязаны уведомить.
             </p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Day 14: send a gentle reminder if you have not heard back.</li>
-              <li>Day 30: follow up formally, referencing the statutory deadline.</li>
-              <li>Day 60: consider filing a complaint with your national authority if still unresolved.</li>
+              <li>День 14: если ответа нет, отправьте вежливое напоминание.</li>
+              <li>День 30: отправьте официальный повторный запрос со ссылкой на установленный законом срок.</li>
+              <li>День 60: если вопрос не решён, подайте жалобу в национальный надзорный орган.</li>
             </ul>
             <button className="link" onClick={() => window.api.openExternal(GUIDE_URL)}>
-              Read our guide on exercising your GDPR rights
+              Наше руководство по реализации прав по GDPR (англ.)
             </button>
           </div>
         </details>
@@ -385,9 +385,9 @@ export default function CaseDetail(): JSX.Element {
     return (
       <div className="space-y-4">
         <button className="btn btn-ghost btn-sm gap-1" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> Назад
         </button>
-        <p className="text-error">Case not found</p>
+        <p className="text-error">Обращение не найдено</p>
       </div>
     );
   }
@@ -418,7 +418,7 @@ export default function CaseDetail(): JSX.Element {
       }
       await refresh();
     } catch (err) {
-      setFlash({ type: "error", text: errText(err, "Could not update the case.") });
+      setFlash({ type: "error", text: errText(err, "Не удалось обновить обращение.") });
     } finally {
       setLinkLoading(false);
     }
@@ -454,7 +454,7 @@ export default function CaseDetail(): JSX.Element {
         recovering ? pendingCaseRecord.messageId : undefined,
       );
       if (result.status === "failed") {
-        setModalError("Could not send the email.");
+        setModalError("Не удалось отправить письмо.");
         return;
       }
       if (result.status === "sent_event_failed") {
@@ -464,21 +464,21 @@ export default function CaseDetail(): JSX.Element {
           messageId: result.messageId,
         });
         setModalError(
-          "The email was sent, but recording it on the case failed. Don't resend.",
+          "Письмо отправлено, но записать его в обращение не удалось. Не отправляйте повторно.",
         );
         return;
       }
       if (result.status !== "sent") {
-        setModalError("Could not send the email.");
+        setModalError("Не удалось отправить письмо.");
         return;
       }
-      const label = sendAction === "reminder" ? "Reminder sent" : "Follow-up sent";
+      const label = sendAction === "reminder" ? "Напоминание отправлено" : "Повторный запрос отправлен";
       setSendAction(null);
       setPendingCaseRecord(undefined);
       await refresh();
       setFlash({ type: "success", text: label });
     } catch (err) {
-      setModalError(errText(err, "Could not send the email."));
+      setModalError(errText(err, "Не удалось отправить письмо."));
     } finally {
       setActionLoading(false);
     }
@@ -496,9 +496,9 @@ export default function CaseDetail(): JSX.Element {
         return;
       }
       await refresh();
-      setFlash({ type: "success", text: "Case closed" });
+      setFlash({ type: "success", text: "Обращение закрыто" });
     } catch (err) {
-      setModalError(errText(err, "Could not close the case."));
+      setModalError(errText(err, "Не удалось закрыть обращение."));
     } finally {
       setActionLoading(false);
     }
@@ -511,9 +511,9 @@ export default function CaseDetail(): JSX.Element {
     try {
       await window.api.reopenGdprCase(id);
       await refresh();
-      setFlash({ type: "success", text: "Case reopened" });
+      setFlash({ type: "success", text: "Обращение открыто снова" });
     } catch (err) {
-      setFlash({ type: "error", text: errText(err, "Could not reopen the case.") });
+      setFlash({ type: "error", text: errText(err, "Не удалось переоткрыть обращение.") });
     } finally {
       setActionLoading(false);
     }
@@ -527,9 +527,9 @@ export default function CaseDetail(): JSX.Element {
       await window.api.escalateGdprCase(id);
       setEscalateOpen(false);
       await refresh();
-      setFlash({ type: "success", text: "Marked as escalated" });
+      setFlash({ type: "success", text: "Отмечено как переданное регулятору" });
     } catch (err) {
-      setModalError(errText(err, "Could not escalate the case."));
+      setModalError(errText(err, "Не удалось отметить передачу регулятору."));
     } finally {
       setActionLoading(false);
     }
@@ -547,7 +547,7 @@ export default function CaseDetail(): JSX.Element {
       )}
       <div className="flex items-center justify-between">
         <button className="btn btn-ghost btn-sm gap-1" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> Назад
         </button>
         <div className="flex items-center gap-2">
           {!isActive && (
@@ -556,7 +556,7 @@ export default function CaseDetail(): JSX.Element {
               disabled={actionLoading}
               onClick={handleReopen}
             >
-              Reopen case
+              Открыть снова
             </button>
           )}
           {isActive && (
@@ -564,7 +564,7 @@ export default function CaseDetail(): JSX.Element {
               className="btn btn-sm btn-neutral"
               onClick={() => { setAlsoRequestDeletion(false); setModalError(undefined); setCloseOpen(true); }}
             >
-              Close case
+              Закрыть обращение
             </button>
           )}
         </div>
@@ -589,8 +589,8 @@ export default function CaseDetail(): JSX.Element {
             {vendorName}
           </button>
           {caseDetail.recipientEmail && <> · {caseDetail.recipientEmail}</>}
-          {" · "}opened {formatAbsoluteDate(openedAt)}
-          {caseDetail.closedAt && <> · closed {formatAbsoluteDate(caseDetail.closedAt)}</>}
+          {" · "}открыто {formatAbsoluteDate(openedAt)}
+          {caseDetail.closedAt && <> · закрыто {formatAbsoluteDate(caseDetail.closedAt)}</>}
         </p>
       </div>
 
@@ -600,13 +600,13 @@ export default function CaseDetail(): JSX.Element {
         <div className="card bg-base-200">
           <div className="card-body p-4 flex-row items-center justify-between gap-4">
             <p className="text-sm">
-              {vendorName} may have responded. Read our guide for what to do next.
+              Возможно, {vendorName} ответила. Что делать дальше — в нашем руководстве.
             </p>
             <button
               className="btn btn-neutral btn-sm shrink-0"
               onClick={() => window.api.openExternal(GUIDE_URL)}
             >
-              Read the guide
+              Открыть руководство
             </button>
           </div>
         </div>
@@ -616,11 +616,11 @@ export default function CaseDetail(): JSX.Element {
         <div className="card bg-warning/10 border border-warning/30">
           <div className="card-body p-4 flex-row items-center justify-between gap-4">
             <p className="text-sm">
-              This account can&apos;t send email on its own. Connect an account with SMTP to
-              send reminders and follow-ups from Paperweight.
+              Этот аккаунт не может отправлять письма. Подключите аккаунт с SMTP, чтобы
+              отправлять напоминания и повторные запросы из Paperweight.
             </p>
             <button className="btn btn-sm btn-ghost shrink-0" onClick={() => navigate("/settings")}>
-              Open settings
+              Открыть настройки
             </button>
           </div>
         </div>
@@ -632,8 +632,8 @@ export default function CaseDetail(): JSX.Element {
             {nextAction === "reminder" && (
               <>
                 <p className="text-sm">
-                  No response yet. A gentle reminder often helps, and it also shows you
-                  followed up if you escalate later.
+                  Ответа пока нет. Вежливое напоминание часто помогает и подтвердит,
+                  что вы добивались ответа, если позже придётся жаловаться.
                 </p>
                 <button
                   className="btn btn-primary btn-sm shrink-0"
@@ -644,15 +644,15 @@ export default function CaseDetail(): JSX.Element {
                     setSendAction("reminder");
                   }}
                 >
-                  Send reminder
+                  Отправить напоминание
                 </button>
               </>
             )}
             {nextAction === "followup" && (
               <>
                 <p className="text-sm">
-                  The official deadline has passed. Send a formal follow-up referencing the
-                  deadline.
+                  Официальный срок истёк. Отправьте официальный повторный запрос
+                  со ссылкой на этот срок.
                 </p>
                 <button
                   className="btn btn-primary btn-sm shrink-0"
@@ -663,29 +663,29 @@ export default function CaseDetail(): JSX.Element {
                     setSendAction("followup");
                   }}
                 >
-                  Send follow-up
+                  Отправить повторный запрос
                 </button>
               </>
             )}
             {nextAction === "escalate" && (
               <>
                 <p className="text-sm">
-                  More than 60 days without resolution. Check our data protection authority
-                  directory, then mark the case escalated when you file a complaint.
+                  Более 60 дней без решения. Найдите свой надзорный орган в справочнике
+                  и, подав жалобу, отметьте обращение как переданное регулятору.
                 </p>
                 <div className="flex gap-2 shrink-0">
                   <button
                     className="btn btn-sm btn-ghost gap-1"
                     onClick={() => window.api.openExternal(AUTHORITIES_URL)}
                   >
-                    DPA directory <ExternalLink className="w-3.5 h-3.5" />
+                    Справочник регуляторов <ExternalLink className="w-3.5 h-3.5" />
                   </button>
                   <button
                     className="btn btn-primary btn-sm"
                     disabled={actionLoading}
                     onClick={() => { setModalError(undefined); setEscalateOpen(true); }}
                   >
-                    I escalated
+                    Я подал(а) жалобу
                   </button>
                 </div>
               </>
@@ -696,15 +696,15 @@ export default function CaseDetail(): JSX.Element {
 
       <div className="card bg-base-200">
         <div className="card-body p-4 gap-0">
-          <h3 className="text-sm font-semibold mb-1">Messages</h3>
+          <h3 className="text-sm font-semibold mb-1">Письма</h3>
           <p className="text-xs text-base-content/50 mb-3">
-            What you sent and what arrived from {vendorName} since this case opened.
+            Что вы отправили и что пришло от {vendorName} с момента открытия обращения.
             {" "}
-            <span className="badge badge-xs badge-soft badge-info">Case</span> marks
-            emails that are part of this case — matched automatically or added by you.
+            <span className="badge badge-xs badge-soft badge-info">Обращение</span> отмечает
+            письма, относящиеся к обращению, — найденные автоматически или добавленные вами.
           </p>
           {communication.length === 0 ? (
-            <p className="text-sm text-base-content/50">No messages yet.</p>
+            <p className="text-sm text-base-content/50">Писем пока нет.</p>
           ) : (
             <div className="flex flex-col gap-0.5 -mx-1 px-1">
               {communication.map((item) => (
@@ -725,9 +725,9 @@ export default function CaseDetail(): JSX.Element {
         <ActionModal
           isOpen
           title={isCaseMessageRecovery(pendingCaseRecord, id, sendAction)
-            ? (sendAction === "reminder" ? "Record reminder" : "Record follow-up")
-            : (sendAction === "reminder" ? "Send reminder" : "Send follow-up")}
-          confirmLabel={isCaseMessageRecovery(pendingCaseRecord, id, sendAction) ? "Record on case" : "Send"}
+            ? (sendAction === "reminder" ? "Записать напоминание" : "Записать повторный запрос")
+            : (sendAction === "reminder" ? "Отправить напоминание" : "Отправить повторный запрос")}
+          confirmLabel={isCaseMessageRecovery(pendingCaseRecord, id, sendAction) ? "Записать в обращение" : "Отправить"}
           confirmVariant="primary"
           copyText={pendingEmail?.body}
           onConfirm={handleSend}
@@ -737,16 +737,16 @@ export default function CaseDetail(): JSX.Element {
         >
           <p>
             {isCaseMessageRecovery(pendingCaseRecord, id, sendAction)
-              ? <>The email was sent to <strong>{caseDetail.recipientEmail}</strong>. Recording it on the case failed — retry recording only, don't send again.</>
+              ? <>Письмо отправлено на <strong>{caseDetail.recipientEmail}</strong>, но записать его в обращение не удалось — повторите только запись, не отправляйте снова.</>
               : <>
-            Before sending, check your inbox for a response — we try to match related
-            messages, but companies sometimes reply from a different address.
+            Перед отправкой проверьте почту — мы стараемся находить связанные письма,
+            но компании иногда отвечают с другого адреса.
               </>}
           </p>
           {!isCaseMessageRecovery(pendingCaseRecord, id, sendAction) && (
           <p>
-            Paperweight will send this from your account to{" "}
-            <strong>{caseDetail.recipientEmail}</strong>, as a reply to your original request:
+            Paperweight отправит это письмо с вашего аккаунта на{" "}
+            <strong>{caseDetail.recipientEmail}</strong> ответом на ваш исходный запрос:
           </p>
           )}
           <pre className="whitespace-pre-wrap text-sm text-base-content/70 bg-base-100 rounded-lg p-3 max-h-64 overflow-y-auto">
@@ -754,7 +754,7 @@ export default function CaseDetail(): JSX.Element {
           </pre>
           {requestEvent?.body && (
             <>
-              <p className="text-xs text-base-content/50">Your original request:</p>
+              <p className="text-xs text-base-content/50">Ваш исходный запрос:</p>
               <pre className="whitespace-pre-wrap text-sm text-base-content/50 bg-base-100 rounded-lg p-3 max-h-40 overflow-y-auto">
                 {requestEvent.body}
               </pre>
@@ -766,15 +766,15 @@ export default function CaseDetail(): JSX.Element {
       {closeOpen && (
         <ActionModal
           isOpen
-          title="Close case"
-          confirmLabel="Close case"
+          title="Закрыть обращение"
+          confirmLabel="Закрыть обращение"
           confirmVariant="primary"
           onConfirm={handleClose}
           onCancel={() => { if (!actionLoading) setCloseOpen(false); }}
           loading={actionLoading}
           error={modalError}
         >
-          <p>Close this case? You can reopen it later if you need to.</p>
+          <p>Закрыть обращение? При необходимости его можно будет открыть снова.</p>
           {requestType === "access" && (
             <label className="flex items-center gap-2 cursor-pointer mt-4">
               <input
@@ -784,7 +784,7 @@ export default function CaseDetail(): JSX.Element {
                 onChange={(e) => setAlsoRequestDeletion(e.target.checked)}
               />
               <span>
-                Want this data gone too? Start a deletion request for{" "}
+                Хотите, чтобы данные тоже удалили? Создать запрос на удаление для{" "}
                 <strong>{vendorName}</strong>.
               </span>
             </label>
@@ -795,8 +795,8 @@ export default function CaseDetail(): JSX.Element {
       {escalateOpen && (
         <ActionModal
           isOpen
-          title="Mark as escalated"
-          confirmLabel="Close case as escalated"
+          title="Передано регулятору"
+          confirmLabel="Закрыть как переданное регулятору"
           confirmVariant="primary"
           onConfirm={handleEscalate}
           onCancel={() => { if (!actionLoading) setEscalateOpen(false); }}
@@ -804,8 +804,8 @@ export default function CaseDetail(): JSX.Element {
           error={modalError}
         >
           <p>
-            This logs that you escalated to your data protection authority and closes the case.
-            You can reopen it later if needed.
+            Будет записано, что вы обратились в надзорный орган, и обращение закроется.
+            При необходимости его можно открыть снова.
           </p>
         </ActionModal>
       )}
