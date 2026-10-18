@@ -2,7 +2,8 @@ name: Портативная версия для Windows
 
 # Собирает один .exe без установки. Запускается вручную (Actions → «Портативная
 # версия для Windows» → Run workflow) и при пуше в рабочую ветку форка.
-# Готовый файл — в разделе Artifacts внизу страницы запуска.
+# Готовый файл — в разделе Artifacts внизу страницы запуска, а в приватном
+# репозитории ещё и в Releases (релиз v<версия>-ru, файл перезаписывается).
 on:
   workflow_dispatch:
   push:
@@ -17,6 +18,8 @@ concurrency:
 jobs:
   portable-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     env:
       # Ключи OAuth берутся из Settings → Secrets and variables → Actions.
       # Без них сборка пройдёт, но вход через Google/Microsoft не заработает
@@ -62,3 +65,29 @@ jobs:
           name: paperweight-portable-windows
           path: dist/*-portable.exe
           archive: false
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Сборка с отключённой проверкой лицензии не должна лежать в публичном
+      # доступе: релиз публикуется только из приватного репозитория.
+      - name: Publish to Releases
+        if: github.event.repository.private
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-ru
+          target_commitish: ${{ github.sha }}
+          name: Paperweight ${{ steps.version.outputs.version }} — русская сборка
+          body: |
+            Портативная версия для Windows: один .exe без установки.
+            Сборка из коммита ${{ github.sha }}.
+          files: dist/*-portable.exe
+          overwrite_files: true
+          make_latest: true
+
+      - name: Skip Releases in a public repository
+        if: ${{ !github.event.repository.private }}
+        shell: bash
+        run: echo "::notice::Репозиторий публичный — релиз не публикуется. Сделайте репозиторий приватным, файл появится в Releases."
